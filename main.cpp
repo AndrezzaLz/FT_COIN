@@ -1,8 +1,8 @@
-
 #include <iostream>
 #include "CarteiraDTO.hpp"
 #include "MovimentacaoDTO.hpp"
 #include "OracleDTO.hpp"
+#include "DAO_Memoria.hpp"
 
 using namespace std;
 
@@ -57,10 +57,21 @@ int main() {
         cin >> cotacao;
 
         OracleDTO oracle(dataCot, cotacao);
-        cout << "Cotação registrada com sucesso!" << endl;
+        cout << "Cotação registrada com sucesso!" << endl << endl;
+
+        cout << "--- Teste DAO em Memória ---" << endl;
+        DAO_Memoria dao;
+        dao.create(mov);  // adiciona a movimentação criada
+
+        cout << "Movimentações armazenadas:" << endl;
+        for (const auto& m : dao.listAll()) {
+            cout << "ID: " << m.id << ", Carteira: " << m.idCarteira
+                 << ", Data: " << m.data << ", Tipo: " << m.tipoOperacao
+                 << ", Quantidade: " << m.quantidade << endl;
+        }
 
     } catch (const exception& e) {
-        cerr << "Erro ao criar DTO: " << e.what() << endl;
+        cerr << "Erro ao criar DTO ou usar DAO: " << e.what() << endl;
     }
 
     return 0;

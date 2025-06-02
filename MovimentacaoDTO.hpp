@@ -1,41 +1,24 @@
 
-#ifndef MOVIMENTACAO_DTO_HPP
-#define MOVIMENTACAO_DTO_HPP
+#ifndef MOVIMENTACAODTO_HPP
+#define MOVIMENTACAODTO_HPP
 
 #include <string>
-#include <stdexcept>
-
-using namespace std;
 
 class MovimentacaoDTO {
 public:
     int id;
     int idCarteira;
-    string data;
+    std::string data;
     char tipoOperacao;
     double quantidade;
 
-    MovimentacaoDTO(int id, int idCarteira, const string& data, char tipoOperacao, double quantidade) {
-        if (quantidade < 0.0) {
-            throw invalid_argument("Quantidade deve ser maior ou igual a zero.");
-        }
-        if (tipoOperacao != 'C' && tipoOperacao != 'V') {
-            throw invalid_argument("Tipo de operação inválido. Use 'C' ou 'V'.");
-        }
-        if (!validarData(data)) {
-            throw invalid_argument("Data inválida. Use o formato YYYY-MM-DD.");
-        }
-        this->id = id;
-        this->idCarteira = idCarteira;
-        this->data = data;
-        this->tipoOperacao = tipoOperacao;
-        this->quantidade = quantidade;
-    }
+    // ✅ Construtor padrão (necessário para containers e compatibilidade com C++11)
+    MovimentacaoDTO()
+        : id(0), idCarteira(0), data(""), tipoOperacao('C'), quantidade(0.0) {}
 
-private:
-    bool validarData(const string& data) {
-        return data.length() == 10 && data[4] == '-' && data[7] == '-';
-    }
+    // ✅ Construtor parametrizado
+    MovimentacaoDTO(int id_, int idCarteira_, const std::string& data_, char tipo_, double quantidade_)
+        : id(id_), idCarteira(idCarteira_), data(data_), tipoOperacao(tipo_), quantidade(quantidade_) {}
 };
 
-#endif
+#endif // MOVIMENTACAODTO_HPP
