@@ -1,0 +1,23 @@
+// Declarações MariaDB
+
+CREATE TABLE Carteira (
+    IdCarteira INT(11) AUTO_INCREMENT PRIMARY KEY,
+    Titular VARCHAR(50) NOT NULL,
+    Corretora VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Movimentacao (
+    IdCarteira INT(11) NOT NULL,
+    IdMovimento INT(11) AUTO_INCREMENT PRIMARY KEY,
+    Data DATE,
+    TipoOperacao CHAR(1),
+    Quantidade DECIMAL (10, 3),
+    FOREIGN KEY (IdCarteira) REFERENCES Carteira(IdCarteira)
+);
+
+CREATE TABLE Oraculo (
+    Data DATE NOT NULL PRIMARY KEY,
+    Cotacao DECIMAL (6,2) NOT NULL
+)
+
+
