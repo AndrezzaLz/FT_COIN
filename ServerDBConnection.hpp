@@ -1,4 +1,4 @@
-#include <maridb/conncpp.hpp>
+#include <mariadb/conncpp.hpp>
 
 #ifndef SERVERDBCONNECTION_H
 #define SERVERDBCONNECTION_H
