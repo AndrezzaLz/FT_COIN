@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "ServerDBConnection.h"
+#include "ServerDBConnection.hpp"
 
 using std::string;
 
