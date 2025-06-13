@@ -11,7 +11,7 @@ class ServerDBConnection final
     string serverPort = "3306";
     string serverIP = "143.106.243.64";
     string serverDatabase = "PooI_25_B09"; 
-    string serverUser = "PooI_25_B09;
+    string serverUser = "PooI_25_B09";
     string serverPassword = "YEdm2DlaRP";
 
     sql::Driver *driver; = NULL;
