@@ -39,3 +39,15 @@ double MovementDTO::getQuantity() const
     return quantity;
     }
 }
+
+void MovementDTO::setMovementId(int movementId)
+    {
+    if (this->movementId == 0)
+        {
+        this->movementId = movementId;
+        }
+    else
+        {
+        throw runtime_error("Operacao invalida: Alteracao do valor de IdMovimento que nao e nulo.");
+        }
+    }
