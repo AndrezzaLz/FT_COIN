@@ -21,6 +21,7 @@ public:
     string getDate() const;
     char getOperationType() const;
     double getQuantity() const;
+    void setMovementId(int movementId);
 };
 
 #endif
