@@ -2,10 +2,10 @@
 #include <vector>
 #include "WalletDBDAO.hpp"
 
-const string WalletDBDAO::SQL_getAllWallets = "select * from CARTEIRA  order by IdCarteira";
+const string WalletDBDAO::SQL_getAllWallets = "select * from CARTEIRA order by IdCarteira";
 const string WalletDBDAO::SQL_getWalletById = "select * from CARTEIRA where IdCarteira = ?";
-const string WalletDBDAO::SQL_addWallet = "insert into CARTEIRA (Titular, Corrretora) values (?,?)";
-const string WalletDBDAO::SQL_updateWallet = "update CARTEIRA set Titular = ?, Correta = ? where IdCarteira = ?";
+const string WalletDBDAO::SQL_addWallet = "insert into CARTEIRA (Titular, Corretora) values (?,?)";
+const string WalletDBDAO::SQL_updateWallet = "update CARTEIRA set Titular = ?, Corretora = ? where IdCarteira = ?";
 const string WalletDBDAO::SQL_deleteWallet = "delete from CARTEIRA where IdCarteira = ?";
 
 WalletDBDAO::WalletDBDAO(ServerDBConnection *serverDBConnection) : serverDBConnection(serverDBConnection)
@@ -16,9 +16,9 @@ WalletDBDAO::~WalletDBDAO()
     {
     }
 
-vector<Wallet*> WalletDBDAO::getAllWallets()
+vector<WalletDTO*> WalletDBDAO::getAllWallets()
     {
-    vector<Wallet*> walletsDB;
+    vector<WalletDTO*> walletsDB;
     try
         {
         unique_ptr<sql::Statement> stmnt(serverDBConnection->getConnection()->createStatement());
@@ -26,24 +26,24 @@ vector<Wallet*> WalletDBDAO::getAllWallets()
 
         while (res->next())
             {
-            int userId = res->getInt(1);
-            string userName = (res->getString(2)).c_str();
-            UserType type = stringToUserType((res->getString(3)).c_str());
+            int walletId = res->getInt(1);
+            string holderName = (res->getString(2)).c_str();
+            string exchangeName = (res->getString(3)).c_str();
 
-            User *buffer = new User(userId, userName, type);
-            usersDB.push_back(buffer);
+            WalletDTO *buffer = new WalletDTO(walletId, holderName, exchangeName);
+            walletsDB.push_back(buffer);
             }
         }
-    catch(const std::SQLException &e)
+    catch(const sql::SQLException &e)
         {
-        cerr << "Erro ao selecionar Carteiras: " e.what() << endl;
+        cerr << "Erro ao selecionar Carteiras: " << e.what() << endl;
         }
     return(walletsDB);
     }
     
-Wallet* WalletDBDAO::getWalletById(int walletId) 
+WalletDTO* WalletDBDAO::getWalletById(int walletId)
     {
-    Wallet *buffer = NULL;
+    WalletDTO *buffer = NULL;
     try
         {
 		unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_getWalletById));
@@ -53,18 +53,60 @@ Wallet* WalletDBDAO::getWalletById(int walletId)
 		if (res->next())
 			{
 			int walletId = res->getInt(1);
-			string userName = (res->getString(2)).c_str();
-			UserType type = stringToUserType((res->getString(3)).c_str());
+		    string holderName = (res->getString(2)).c_str();
+		    string exchangeName = (res->getString(3)).c_str();
 
-			buffer = new User(userId, userName, type);
+			buffer = new WalletDTO(walletId, holderName, exchangeName);
 			}    
         }
-    catch(const std::exception& e)
+    catch(sql::SQLException &e)
         {
-        cerr << "Erro ao selecionar Carteira: " << e.what() << endl;
+        cerr << "Erro ao selecionar Carteiras: " << e.what() << endl;
+        }
+    return(buffer);
+    }
+
+void WalletDBDAO::addWallet(WalletDTO *wallet)
+    {
+    try
+        {
+        unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_addWallet));
+        stmnt->setString(1, wallet.getHolderName());
+        stmnt->setString(2, wallet.getExchangeName());
+        stmnt->executeQuery();
+        }
+    catch(sql::SQLException &e)
+        {
+        cerr << "Erro ao inserir nova Carteira: " << e.what() << endl;
         }
     }
 
-        virtual void addWallet(Wallet *wallet);
-        virtual void updateWallet(Wallet *wallet);
-        virtual void deleteWallet(int walletId);  
+void WalletDBDAO::updateWallet(WalletDTO *wallet)
+    {
+    try
+        {
+        unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_updateWallet));
+        stmnt->setString(1, wallet.getHolderName());
+        stmnt->setString(2, wallet.getExchangeName());
+        stmnt->setInt(3, wallet->getWalletId());
+        stmnt->executeQuery();
+        }
+    catch(sql::SQLException &e)
+        {
+        cerr << "Erro ao atualizar Carteira: " << e.what() << endl;
+        }
+    }
+
+void WalletDBDAO::deleteWallet(int walletId)
+    {
+    try
+        {
+        unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_deleteWallet));
+        stmnt->setInt(1, walletId);
+        stmnt->executeQuery();
+        }
+    catch(sql::SQLException &e)
+        {
+        cerr << "Erro ao deletar Carteira: " << e.what() << endl;
+        }
+    }
