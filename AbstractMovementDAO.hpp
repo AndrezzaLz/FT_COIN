@@ -9,7 +9,7 @@ public:
     AbstractMovementDAO();
     virtual ~AbstractMovementDAO();
 
-    virtual void registerTransaction(const MovementDTO& movement) = 0;
+    virtual void registerTransaction(MovementDTO* movement) = 0;
     virtual vector<MovementDTO*> getHistoryByWalletId(int walletId) = 0;
 };
 
