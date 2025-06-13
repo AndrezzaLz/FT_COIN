@@ -17,7 +17,7 @@ class MovementDBDAO final : public AbstractMovementDAO
         MovementDBDAO(ServerDBConnection *serverDBConnection);
         virtual ~MovementDBDAO();
 
-        virtual void registerTransaction(const MovementDTO& movement);
+        virtual void registerTransaction(MovementDTO *movement);
         virtual vector<MovementDTO*> getHistoryByWalletId(int walletId);
 };
 
