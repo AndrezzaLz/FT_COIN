@@ -71,8 +71,8 @@ void WalletDBDAO::addWallet(WalletDTO *wallet)
     try
         {
         unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_addWallet));
-        stmnt->setString(1, wallet.getHolderName());
-        stmnt->setString(2, wallet.getExchangeName());
+        stmnt->setString(1, wallet->getHolderName());
+        stmnt->setString(2, wallet->getExchangeName());
         stmnt->executeQuery();
         }
     catch(sql::SQLException &e)
@@ -86,8 +86,8 @@ void WalletDBDAO::updateWallet(WalletDTO *wallet)
     try
         {
         unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_updateWallet));
-        stmnt->setString(1, wallet.getHolderName());
-        stmnt->setString(2, wallet.getExchangeName());
+        stmnt->setString(1, wallet->getHolderName());
+        stmnt->setString(2, wallet->getExchangeName());
         stmnt->setInt(3, wallet->getWalletId());
         stmnt->executeQuery();
         }
