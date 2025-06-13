@@ -22,7 +22,7 @@ vector<MovementDTO*>& MemoryDBConnection::getMovementList()
     return this->movementsDB;
     }
 
-vector<OracleDTO*>& MemoryDBConnection::getOracleList()
+map<string, OracleDTO*>& MemoryDBConnection::getOracleMap()
     {
     return this->oracleDB;
     }
@@ -45,8 +45,7 @@ void MemoryDBConnection::close()
 
     for (auto const& [key, value] : oracleDB)
         {
-        delete buffer;
-        buffer = NULL;
+        delete value;
         }
     oracleDB.clear();
     }

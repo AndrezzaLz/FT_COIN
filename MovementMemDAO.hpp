@@ -13,12 +13,9 @@ class MovementMemDAO final : public AbstractMovementDAO
     public:
         MovementMemDAO(MemoryDBConnection *memoryDBConnection);
         virtual ~MovementMemDAO();
-
-        virtual vector<MovementDTO*> getAllMovements(); // const ?
-        virtual MovementDTO* getMovementById(int movementId); // read
-        virtual void addMovement(MovementDTO *movement); // ou const &?
-        virtual void updateMovement(MovementDTO *movement); // ID + const &
-        virtual void deleteMovement(MovementDTO *movement); // remove ID
+    
+        virtual void registerTransaction(MovementDTO* movement);
+        virtual vector<MovementDTO*> getHistoryByWalletId(int walletId); 
     };
 
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "OracleDBDAO.hpp"
+#include "Date.hpp"
 
 const string OracleDBDAO::SQL_saveQuote = "insert into ORACULO (Data, Cotacao) values (?, ?) on duplicate key update Cotacao = Values(Cotacao)";
 const string OracleDBDAO::SQL_getQuote = "select Data, Cotacao from ORACULO where data = ?";
@@ -13,13 +14,13 @@ OracleDBDAO::~OracleDBDAO()
     {
     }
 
-void OracleDBDAO::saveQuote(Oracle *quote)
+void OracleDBDAO::saveQuote(OracleDTO *quote)
     {
     try
         {
         unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_saveQuote));
 
-        stmnt->setString(1, quote->getDate());
+        stmnt->setString(1, quote->getDate().getIsoFormat());
         stmnt->setDouble(2, quote->getQuote());
 
         stmnt->executeQuery();
@@ -30,7 +31,7 @@ void OracleDBDAO::saveQuote(Oracle *quote)
         }
     }
 
-Oracle* OracleDBDAO::getQuoteByDate(string date)
+OracleDTO* OracleDBDAO::getQuoteByDate(string date)
     {
     OracleDTO *buffer = NULL;
     try
@@ -41,10 +42,11 @@ Oracle* OracleDBDAO::getQuoteByDate(string date)
 
         if (res->next())
             {
-            string resultDate = res->getString(1);
+            string resultDateStr = res->getString(1);
+            Date dateObjectFromDB(resultDateStr);
             double quote = res->getDouble(2);
 
-            buffer = new OracleDTO(resultDate, quote);
+            buffer = new OracleDTO(dateObjectFromDB, quote);
             }
         }
     catch(sql::SQLException &e)

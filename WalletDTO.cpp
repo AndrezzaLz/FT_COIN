@@ -10,9 +10,6 @@ WalletDTO::WalletDTO(int walletId, const string& holderName, const string& excha
         if (exchangeName.empty()) {
             throw invalid_argument("Corretora não pode estar vazia.");
         }
-        this->walletId = walletId;
-        this->holderName = holderName;
-        this->exchangeName = exchangeName;
     }
 
 WalletDTO::~WalletDTO()

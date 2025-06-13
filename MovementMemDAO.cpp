@@ -1,4 +1,6 @@
 #include "MovementMemDAO.hpp"
+#include "MemoryDBConnection.hpp"
+#include "MovementDTO.hpp"
 
 int MovementMemDAO::lastMovementId = 0;
 
@@ -10,15 +12,22 @@ MovementMemDAO::~MovementMemDAO()
     {
     }
 
-vector<MovementDTO*> MovememtMemDAO::getAllMovements() // const ?
+void MovementMemDAO::registerTransaction(MovementDTO* movement)
     {
-    return (memoryDBConnection->getMovementList());
+        movement->setMovementId(++lastMovementId);
+        memoryDBConnection->getMovementList().push_back(movement);    
     }
 
-MovementDTO* MovementMemDAO::getMovementById(int movementId) // read
+vector<MovementDTO*> MovementMemDAO::getHistoryByWalletId(int walletId)
     {
-    return (memoryDBConnection->getMovementById(movementId));
-
-virtual void addMovement(MovementDTO *movement); // ou const &?
-virtual void updateMovement(MovementDTO *movement); // ID + const &
-virtual void deleteMovement(MovementDTO *movement); // remove ID
+    vector<MovementDTO*> history;    
+    for(MovementDTO* movement : memoryDBConnection->getMovementList())
+        {
+        if (movement->getWalletId() == walletId)
+            {
+            history.push_back(movement);    
+            }    
+        }
+    return (history);
+    }
+ 

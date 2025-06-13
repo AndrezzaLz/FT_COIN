@@ -2,20 +2,20 @@
 #define ORACLEDTO_HPP
 
 #include <string>
+#include "Date.hpp"
 using namespace std;
 
 class OracleDTO {
 private:
-    string date;
+    Date date;
     double quote;
 
 public:
-    OracleDTO(const string& date, double quote);
+    OracleDTO(Date date, double quote);
     virtual ~OracleDTO();
 
-    string getDate() const;
+    Date getDate() const;
     double getQuote() const;
-    bool isDateValid(const string& date);
 };
 
 #endif
