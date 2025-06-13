@@ -13,7 +13,7 @@ OracleDBDAO::~OracleDBDAO()
     {
     }
 
-void OracleDBDAO::saveQuote(const Oracle& quote)
+void OracleDBDAO::saveQuote(Oracle *quote)
     {
     try
         {
