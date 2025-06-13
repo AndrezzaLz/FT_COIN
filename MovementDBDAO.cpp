@@ -12,7 +12,7 @@ MovementDBDAO::~MovementDBDAO()
     {
     }
 
-void MovementDBDAO::registerTransaction(const MovementDTO& movement)
+void MovementDBDAO::registerTransaction(MovementDTO *movement)
     {
     try
         {
