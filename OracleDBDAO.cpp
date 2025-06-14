@@ -31,18 +31,18 @@ void OracleDBDAO::saveQuote(OracleDTO *quote)
         }
     }
 
-OracleDTO* OracleDBDAO::getQuoteByDate(string date)
+OracleDTO* OracleDBDAO::getQuoteByDate(Date date)
     {
     OracleDTO *buffer = NULL;
     try
         {
         unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_getQuote));
-        stmnt->setString(1, date);
+        stmnt->setString(1, date.getIsoFormat());
         sql::ResultSet *res = stmnt->executeQuery();
 
         if (res->next())
             {
-            string resultDateStr = res->getString(1);
+            string resultDateStr(res->getString(1));
             Date dateObjectFromDB(resultDateStr);
             double quote = res->getDouble(2);
 
@@ -55,4 +55,3 @@ OracleDTO* OracleDBDAO::getQuoteByDate(string date)
         }
     return (buffer);
     }
-}

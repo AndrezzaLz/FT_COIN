@@ -18,7 +18,7 @@ class OracleDBDAO final : public AbstractOracleDAO
         virtual ~OracleDBDAO();
 
         virtual void saveQuote(OracleDTO *quote);
-        virtual OracleDTO* getQuoteByDate(string date);
+        virtual OracleDTO* getQuoteByDate(Date date);
 };
 
 #endif

@@ -2,6 +2,8 @@
 #define MEMORYDBCONNECTION_HPP
 
 #include <vector>
+#include <map>
+#include <string>
 #include "WalletDTO.hpp"
 #include "MovementDTO.hpp"
 #include "OracleDTO.hpp"

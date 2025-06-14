@@ -53,8 +53,8 @@ WalletDTO* WalletDBDAO::getWalletById(int walletId)
 		if (res->next())
 			{
 			int walletId = res->getInt(1);
-		    string holderName = (res->getString(2)).c_str();
-		    string exchangeName = (res->getString(3)).c_str();
+		    string holderName(res->getString(2));
+		    string exchangeName(res->getString(3));
 
 			buffer = new WalletDTO(walletId, holderName, exchangeName);
 			}    

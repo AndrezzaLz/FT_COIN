@@ -43,9 +43,9 @@ void MemoryDBConnection::close()
         }
     movementsDB.clear();
 
-    for (auto const& [key, value] : oracleDB)
+    for (std::map<std::string, OracleDTO*>::iterator it = oracleDB.begin(); it != oracleDB.end(); ++it) 
         {
-        delete value;
+        delete it->second; // it->second é o ponteiro para OracleDTO*
         }
     oracleDB.clear();
     }

@@ -42,7 +42,7 @@ vector<MovementDTO*> MovementDBDAO::getHistoryByWalletId(int walletId)
             {
             int movementId = res->getInt(1);
             int WalletId = res->getInt(2);
-            string dateStr = res->getString(3);
+            string dateStr(res->getString(3));
             Date date(dateStr);
             char operationType = res->getString(4).at(0);
             double quantity = res->getDouble(5);
