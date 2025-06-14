@@ -16,8 +16,8 @@ Date::Date()
 
 Date::Date(string isoFormat)
 	{
-	day = stoi(isoFormat.substr(8, 10));
-	month = stoi(isoFormat.substr(5, 7));
+	day = stoi(isoFormat.substr(8, 2));
+	month = stoi(isoFormat.substr(5, 2));
 	year = stoi(isoFormat.substr(0, 4));
 	}
 

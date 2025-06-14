@@ -1,6 +1,7 @@
 #include "MovementMemDAO.hpp"
 #include "MemoryDBConnection.hpp"
 #include "MovementDTO.hpp"
+#include <algorithm>
 
 int MovementMemDAO::lastMovementId = 0;
 
@@ -28,6 +29,11 @@ vector<MovementDTO*> MovementMemDAO::getHistoryByWalletId(int walletId)
             history.push_back(movement);    
             }    
         }
+        
+    sort(history.begin(), history.end(), [](MovementDTO* a, MovementDTO* b) 
+        {
+    return a->getDate() < b->getDate(); 
+        });
     return (history);
     }
  
