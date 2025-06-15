@@ -54,7 +54,7 @@ const int Menu::getChoice()
 			{
 			unsigned long index = 0;
 			cout << decorator << endl;
-			cout << title << endl;
+			cout << "\033[1m" << title << "\033[0m" << endl;	
 			cout << decorator << endl;
 
 			for (index = 0; index < ((itens.size() - (zeroForLastOpt ? 1 : 0))); index++)
@@ -178,6 +178,5 @@ void Menu::setZeroForLastOpt(bool zeroForLastOpt)
 
 Menu::~Menu()
 	{
-	// Nothing to do
 	}
 

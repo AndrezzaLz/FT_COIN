@@ -3,9 +3,11 @@
 
 int WalletMemDAO::lastWalletId = 1;
 
-WalletMemDAO::WalletMemDAO(MemoryDBConnection *memoryConnection) : memoryDBConnection(memoryDBConnection)
-    {
-    }
+WalletMemDAO::WalletMemDAO(MemoryDBConnection *memoryDBConnection)
+{
+    //Usei 'this->' para desambiguar e atribuir o parâmetro à variável 
+    this->memoryDBConnection = memoryDBConnection;
+}
 
 WalletMemDAO::~WalletMemDAO()
     {
@@ -17,25 +19,17 @@ vector<WalletDTO*> WalletMemDAO::getAllWallets()
     }
 
 WalletDTO* WalletMemDAO::getWalletById(int walletId)
-    {
+{
     vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
-    vector<WalletDTO*>::iterator walletsIterator = wallets.begin();
-    WalletDTO *buffer = NULL;
-    bool found = false;
-
-    while ((!found) && (walletsIterator != wallets.end()))
-        {
-        if ((*walletsIterator)->getWalletId() == walletId)
-            {
-                found = true;
-                buffer = *walletsIterator;
-            }
-        walletsIterator++;
+    
+    for (WalletDTO* walletPtr : wallets) {
+        if (walletPtr->getWalletId() == walletId) {
+            return new WalletDTO(*walletPtr);
+        }
     }
 
-    return (buffer);
-    }
-
+    return nullptr; // Se não encontrar, retorna nulo.
+}
 void WalletMemDAO::addWallet(WalletDTO *wallet)
     {
     wallet->setWalletId(++lastWalletId);

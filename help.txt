@@ -1,0 +1,43 @@
+Bem-vindo ao FT_Coin - Seu Sistema de Apuração de Ganhos e Perdas em Criptomoedas!
+
+Este software permite que você gerencie suas carteiras de moedas virtuais, 
+registre suas movimentações de compra e venda, e visualize relatórios 
+detalhados, incluindo seu saldo atual e o histórico de ganhos e perdas.
+
+Funcionalidades Principais:
+
+1.  Carteira:
+    - Incluir um novo registro de carteira com nome do titular e corretora.
+    - Recuperar dados de uma carteira existente pelo seu identificador único.
+    - Editar informações de uma carteira já registrada.
+    - Excluir um registro de carteira.
+    - Listar todas as carteiras, ordenadas por ID ou nome do titular.
+
+2.  Movimentação:
+    - Registrar a compra de uma moeda virtual em uma de suas carteiras, 
+      informando a data da operação e a quantidade.
+    - Registrar a venda de uma moeda virtual de uma carteira, também 
+      com data e quantidade.
+
+3.  Relatórios:
+    - Exibir o saldo atual de uma carteira específica, calculado com base 
+      nas movimentações e cotações do oráculo.
+    - Apresentar o histórico completo de movimentações de uma carteira.
+    - Calcular e mostrar o ganho ou perda total de cada carteira, utilizando 
+      as cotações históricas do oráculo.
+
+4.  Oráculo:
+    - O sistema consulta um banco de dados de cotações para realizar os cálculos. 
+      Certifique-se de que as cotações para as datas das suas operações estejam disponíveis.
+
+5.  Sair:
+    - Encerra o programa de forma segura, fechando todas as conexões.
+
+Dicas de Uso:
+- Sempre forneça dados válidos. O sistema fará validações básicas para IDs e quantidades.
+- Para datas, use o formato YYYY.MM.DD.
+- Para consultas de banco de dados, certifique-se de que o MariaDB está rodando e as credenciais estão corretas.
+
+Em caso de dúvidas ou problemas, consulte a tela de Créditos para informações de contato do desenvolvedor.
+
+Aproveite o FT_Coin para ter mais controle sobre suas finanças de criptomoedas!
