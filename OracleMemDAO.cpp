@@ -1,7 +1,7 @@
 #include "OracleMemDAO.hpp"
 #include "MemoryDBConnection.hpp"
 #include "OracleDTO.hpp"
-#include "RecordNotFoundException.hpp" // MODIFIED: Included the new exception file.
+#include "RecordNotFoundException.hpp" 
 #include <iostream>
 #include <algorithm>
 #include <string> 
@@ -10,7 +10,6 @@ OracleMemDAO::OracleMemDAO(MemoryDBConnection* memoryDBConnection) : memoryDBCon
 
 OracleMemDAO::~OracleMemDAO() {}
 
-// MODIFIED: Now throws an exception with a message in English.
 OracleDTO* OracleMemDAO::getQuoteByDate(Date date) {
     auto it = memoryDBConnection->getOracleMap().find(date.getIsoFormat());
 
