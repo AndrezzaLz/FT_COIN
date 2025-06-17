@@ -1,5 +1,7 @@
 #include <vector>
+#include <string>
 #include "WalletMemDAO.hpp"
+#include "RecordNotFoundException.hpp" 
 
 int WalletMemDAO::lastWalletId = 1;
 
@@ -19,21 +21,12 @@ vector<WalletDTO*> WalletMemDAO::getAllWallets()
 WalletDTO* WalletMemDAO::getWalletById(int walletId)
     {
     vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
-    vector<WalletDTO*>::iterator walletsIterator = wallets.begin();
-    WalletDTO *buffer = NULL;
-    bool found = false;
-
-    while ((!found) && (walletsIterator != wallets.end()))
-        {
-        if ((*walletsIterator)->getWalletId() == walletId)
-            {
-                found = true;
-                buffer = *walletsIterator;
-            }
-        walletsIterator++;
+    for (WalletDTO* wallet : wallets) {
+        if (wallet->getWalletId() == walletId) {
+            return wallet;
+        }
     }
-
-    return (buffer);
+    throw RecordNotFoundException("Wallet with ID " + std::to_string(walletId) + " not found.");
     }
 
 void WalletMemDAO::addWallet(WalletDTO *wallet)
@@ -44,24 +37,35 @@ void WalletMemDAO::addWallet(WalletDTO *wallet)
 
 void WalletMemDAO::updateWallet(WalletDTO *wallet)
     {
-    deleteWallet(wallet->getWalletId());
-    addWallet(wallet);
+    vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
+    for (auto it = wallets.begin(); it != wallets.end(); ++it) {
+        if ((*it)->getWalletId() == wallet->getWalletId()) {
+            delete *it; 
+            *it = wallet; 
+            return; 
+        }
+    }
+    throw RecordNotFoundException("Wallet with ID " + std::to_string(wallet->getWalletId()) + " not found for update.");
     }
 
 void WalletMemDAO::deleteWallet(int walletId)
     {
     vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
-    vector<WalletDTO*>::iterator walletsIterator = wallets.begin();
-    bool found = false;
-
-    while ((!found) && (walletsIterator != wallets.end()))
+    auto walletsIterator = wallets.begin();
+    
+    while (walletsIterator != wallets.end())
         {
         if ((*walletsIterator)->getWalletId() == walletId)
             {
-                found = true;
-                delete *walletsIterator;
+                delete *walletsIterator; 
                 wallets.erase(walletsIterator);
+                return; 
             }
-        walletsIterator++;
+        else
+            {
+            ++walletsIterator;
+            }
         }
+    
+    throw RecordNotFoundException("Wallet with ID " + std::to_string(walletId) + " not found for deletion.");
     }
