@@ -1,7 +1,7 @@
 #include "OracleMemDAO.hpp"
 #include "MemoryDBConnection.hpp"
 #include "OracleDTO.hpp"
-#include "RegistroNaoEncontradoException.hpp" 
+#include "RecordNotFoundException.hpp" // MODIFIED: Included the new exception file.
 #include <iostream>
 #include <algorithm>
 #include <string> 
@@ -10,6 +10,7 @@ OracleMemDAO::OracleMemDAO(MemoryDBConnection* memoryDBConnection) : memoryDBCon
 
 OracleMemDAO::~OracleMemDAO() {}
 
+// MODIFIED: Now throws an exception with a message in English.
 OracleDTO* OracleMemDAO::getQuoteByDate(Date date) {
     auto it = memoryDBConnection->getOracleMap().find(date.getIsoFormat());
 
@@ -17,7 +18,7 @@ OracleDTO* OracleMemDAO::getQuoteByDate(Date date) {
         return it->second;
     }
     
-    throw RegistroNaoEncontradoException("Cotacao para a data " + date.getIsoFormat() + " nao encontrada.");
+    throw RecordNotFoundException("Quote for date " + date.getIsoFormat() + " not found.");
 }
 
 void OracleMemDAO::saveQuote(OracleDTO* quote) {
