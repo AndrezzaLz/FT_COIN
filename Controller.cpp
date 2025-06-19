@@ -85,11 +85,15 @@ Controller::~Controller()
         delete memoryDBConnection;
         memoryDBConnection = nullptr;
     }
+
+#ifdef USE_MARIADB
     if (serverDBConnection)
     {
         delete serverDBConnection;
         serverDBConnection = nullptr;
     }
+#endif
+    
 }
 
 void Controller::start()
