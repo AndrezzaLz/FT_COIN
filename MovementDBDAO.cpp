@@ -1,3 +1,5 @@
+#ifdef USE_MARIADB
+
 #include <iostream>
 #include "MovementDBDAO.hpp"
 
@@ -58,5 +60,4 @@ vector<MovementDTO*> MovementDBDAO::getHistoryByWalletId(int walletId)
         return historyDB;
     }
 
-
-
+#endif
