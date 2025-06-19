@@ -1,3 +1,5 @@
+#ifdef USE_MARIADB
+
 #include <iostream>
 #include "OracleDBDAO.hpp"
 #include "Date.hpp"
@@ -55,3 +57,5 @@ OracleDTO* OracleDBDAO::getQuoteByDate(Date date)
         }
     return (buffer);
     }
+
+#endif
