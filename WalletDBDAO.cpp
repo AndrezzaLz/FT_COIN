@@ -1,3 +1,5 @@
+#ifdef USE_MARIADB
+
 #include <iostream>
 #include <vector>
 #include "WalletDBDAO.hpp"
@@ -110,3 +112,5 @@ void WalletDBDAO::deleteWallet(int walletId)
         cerr << "Erro ao deletar Carteira: " << e.what() << endl;
         }
     }
+
+#endif
