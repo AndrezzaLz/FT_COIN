@@ -15,7 +15,6 @@
 #include <unordered_map>
 #include <iomanip>
 #include <algorithm>
-#include <memory>
 
 class BusinessLogic {
 private:
@@ -33,7 +32,7 @@ public:
         double balance = 0.0;
 
         for (const MovementDTO* mov : movements) {
-            std::unique_ptr<OracleDTO> quote(oracleDAO->getQuoteByDate(mov->getDate()));
+            OracleDTO* quote = oracleDAO->getQuoteByDate(mov->getDate());
             double value = mov->getQuantity() * quote->getQuote();
 
             if (mov->getOperationType() == 'C') {
@@ -41,6 +40,8 @@ public:
             } else if (mov->getOperationType() == 'V') {
                 balance += value;
             }
+
+            delete quote;  // liberar memória
         }
 
         return balance;
@@ -56,7 +57,7 @@ public:
         Date latestDate;
 
         for (const MovementDTO* mov : movements) {
-            std::unique_ptr<OracleDTO> quote(oracleDAO->getQuoteByDate(mov->getDate()));
+            OracleDTO* quote = oracleDAO->getQuoteByDate(mov->getDate());
             double value = mov->getQuantity() * quote->getQuote();
 
             if (mov->getOperationType() == 'C') {
@@ -68,12 +69,15 @@ public:
             if (mov->getDate() > latestDate) {
                 latestDate = mov->getDate();
             }
+
+            delete quote;  // liberar memória
         }
 
-        std::unique_ptr<OracleDTO> currentQuote(oracleDAO->getQuoteByDate(latestDate));
+        OracleDTO* currentQuote = oracleDAO->getQuoteByDate(latestDate);
         for (const MovementDTO* mov : movements) {
             currentValue += mov->getQuantity() * currentQuote->getQuote();
         }
+        delete currentQuote;
 
         return currentValue - totalCost;
     }
@@ -103,7 +107,7 @@ public:
         std::cout << "Date\t\tType\tQuantity\tQuote\t\tValue\n";
 
         for (const MovementDTO* mov : movements) {
-            std::unique_ptr<OracleDTO> quote(oracleDAO->getQuoteByDate(mov->getDate()));
+            OracleDTO* quote = oracleDAO->getQuoteByDate(mov->getDate());
             double value = mov->getQuantity() * quote->getQuote();
 
             std::cout << mov->getDate() << "\t"
@@ -111,6 +115,8 @@ public:
                       << mov->getQuantity() << "\t\t"
                       << std::fixed << std::setprecision(2) << quote->getQuote() << "\t\t"
                       << value << "\n";
+
+            delete quote;  // liberar memória
         }
 
         double balance = calculateWalletBalance(walletId);
