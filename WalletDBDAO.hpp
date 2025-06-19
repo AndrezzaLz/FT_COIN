@@ -20,10 +20,10 @@ class WalletDBDAO final : public AbstractWalletDAO
         WalletDBDAO(ServerDBConnection *serverDBConnection);
         virtual ~WalletDBDAO();
 
-        virtual vector<Wallet*> getAllWallets();
-        virtual Wallet* getWalletById(int walletId);
-        virtual void addWallet(Wallet *wallet);
-        virtual void updateWallet(Wallet *wallet);
+        virtual vector<WalletDTO*> getAllWallets();
+        virtual WalletDTO* getWalletById(int walletId);
+        virtual void addWallet(WalletDTO *wallet);
+        virtual void updateWallet(WalletDTO *wallet);
         virtual void deleteWallet(int walletId);  
     };
 

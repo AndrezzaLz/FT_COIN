@@ -1,3 +1,5 @@
+#ifdef USE_MARIADB
+
 #include <iostream>
 #include <string>
 #include "ServerDBConnection.hpp"
@@ -35,3 +37,5 @@ sql::Connection* ServerDBConnection::getConnection() const
     {
     return (this->connection);
     }
+
+#endif
