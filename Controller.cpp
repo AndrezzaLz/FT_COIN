@@ -9,9 +9,13 @@
 #include "WalletMemDAO.hpp"
 #include "MovementMemDAO.hpp"
 #include "OracleMemDAO.hpp"
+
+#ifdef USE_MARIADB
+#include "ServerDBConnection.hpp"
 #include "WalletDBDAO.hpp"
 #include "MovementDBDAO.hpp"
 #include "OracleDBDAO.hpp"
+#endif
 
 // Usar std:: para evitar 'using namespace std;' em .cpp se preferir
 // Alternativamente, para simplificar neste arquivo:
@@ -41,11 +45,24 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
 
     case DataBaseSelector::MARIADB:
     {
-        serverDBConnection = new ServerDBConnection();
-        walletDAO = new WalletDBDAO(serverDBConnection);
-        movementDAO = new MovementDBDAO(serverDBConnection);
-        oracleDAO = new OracleDBDAO(serverDBConnection);
-    }
+#ifdef USE_MARIADB
+        try
+            {
+            serverDBConnection = new ServerDBConnection();
+            walletDAO = new WalletDBDAO(serverDBConnection);
+            movementDAO = new MovementDBDAO(serverDBConnection);
+            oracleDAO = new OracleDBDAO(serverDBConnection);
+            }
+        catch (const exception& e) 
+            {
+            cerr << "ERRO FATAL: Falha ao conectar ao MariaDB ou instanciar DAOs: " << e.what() << endl;
+            exit(1);
+            }
+#else
+        cerr << "ERRO: O programa nao foi compilado com suporte a MariaDB." << endl;
+        exit(1);
+#endif
+    }  
     break;
     default:
     {
