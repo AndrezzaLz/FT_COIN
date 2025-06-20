@@ -32,6 +32,7 @@ private:
     AbstractWalletDAO *walletDAO;
     AbstractMovementDAO *movementDAO;
     AbstractOracleDAO *oracleDAO;
+    BusinessLogic *businessLogic;
 
     // Métodos para as ações dos menus principais
     void actionWallet();

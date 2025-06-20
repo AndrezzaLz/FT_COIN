@@ -9,6 +9,7 @@
 #include "WalletMemDAO.hpp"
 #include "MovementMemDAO.hpp"
 #include "OracleMemDAO.hpp"
+#include "BusinessLogic.hpp"
 
 #ifdef USE_MARIADB
 #include "ServerDBConnection.hpp"
@@ -38,6 +39,7 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
         walletDAO = new WalletMemDAO(memoryDBConnection);
         movementDAO = new MovementMemDAO(memoryDBConnection);
         oracleDAO = new OracleMemDAO(memoryDBConnection);
+        businessLogic = new BusinessLogic(walletDAO, movementDAO, oracleDAO);
 
         populateDemoData();
     }
@@ -52,6 +54,7 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
             walletDAO = new WalletDBDAO(serverDBConnection);
             movementDAO = new MovementDBDAO(serverDBConnection);
             oracleDAO = new OracleDBDAO(serverDBConnection);
+            businessLogic = new BusinessLogic(walletDAO, movementDAO, oracleDAO);
             }
         catch (const exception& e) 
             {
@@ -79,6 +82,8 @@ Controller::~Controller()
     movementDAO = nullptr;
     delete oracleDAO;
     oracleDAO = nullptr;
+    delete businessLogic;
+    businessLogic = nullptr;
 
     if (memoryDBConnection)
     {
@@ -535,40 +540,21 @@ void Controller::showWalletBalance()
         return;
     }
 
-    vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(walletId);
-    double balance = 0.0;
-
-    for (MovementDTO *mov : history)
-    {
-        OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
-        double quote = quoteObj ? quoteObj->getQuote() : 0.0; // Assume cotação 0 se não encontrar (ou joga erro)
-        if (quoteObj)
-            delete quoteObj; // Liberar memória do DTO da cotação
-
-        if (mov->getOperationType() == 'C')
-        { // Compra
-            balance -= (mov->getQuantity() * quote);
-        }
-        else if (mov->getOperationType() == 'V')
-        { // Venda
-            balance += (mov->getQuantity() * quote);
-        }
-    }
+    double saldo = businessLogic->calculateWalletBalance(walletId);
 
     cout << Utils::replicate("=", 80) << endl;
-    cout << "Saldo da Carteira " << targetWallet->getHolderName() << " (ID: " << targetWallet->getWalletId() << "): ";
-    cout << fixed << setprecision(2) << balance << endl;
+    cout << "Saldo da Carteira " << targetWallet->getHolderName()
+         << " (ID: " << targetWallet->getWalletId() << "): R$ "
+         << fixed << setprecision(2) << saldo << endl;
     cout << Utils::replicate("=", 80) << endl;
 
-    for (MovementDTO *mov : history)
-    {
-        delete mov;
-    } 
+    delete targetWallet;
 }
 
 void Controller::showMovementHistory()
 {
     Utils::printMessage("Exibir Historico de Movimentacao da Carteira");
+    
     int walletId;
     cout << "Digite o ID da Carteira: ";
     while (!(cin >> walletId) || walletId <= 0)
@@ -586,44 +572,10 @@ void Controller::showMovementHistory()
         return;
     }
 
-    vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(walletId);
+    //Usa a lógica de negócio para gerar o relatório
+    businessLogic->detailedWalletReport(walletId);
 
-    cout << Utils::replicate("=", 90) << endl;
-    cout << "Historico de Movimentacao para Carteira: " << targetWallet->getHolderName() << " (ID: " << targetWallet->getWalletId() << ")" << endl;
-    cout << Utils::replicate("=", 90) << endl;
-
-    if (history.empty())
-    {
-        Utils::printMessage("Nenhuma movimentacao para esta carteira.");
-    }
-    else
-    {
-        cout << left << setw(10) << "ID Mov." << setw(15) << "Data Op." << setw(15) << "Tipo" << setw(15) << "Quantidade" << setw(15) << "Cotacao" << setw(15) << "Valor Total" << endl;
-        cout << Utils::replicate("-", 90) << endl;
-        for (MovementDTO *mov : history)
-        {
-            OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
-            double quote = quoteObj ? quoteObj->getQuote() : 0.0;
-            if (quoteObj)
-                delete quoteObj;
-
-            double totalValue = mov->getQuantity() * quote;
-            string typeStr = (mov->getOperationType() == 'C') ? "Compra" : "Venda";
-
-            cout << left << setw(10) << mov->getMovementId()
-                 << setw(15) << mov->getDate()
-                 << setw(15) << typeStr
-                 << fixed << setprecision(3) << setw(15) << mov->getQuantity()
-                 << fixed << setprecision(2) << setw(15) << quote
-                 << fixed << setprecision(2) << setw(15) << totalValue << endl;
-        }
-    }
-    cout << Utils::replicate("=", 90) << endl;
-
-    for (MovementDTO *mov : history)
-    {
-        delete mov;
-    }
+    delete targetWallet; //liberar memória
 }
 
 void Controller::showGainsLosses()
@@ -643,29 +595,8 @@ void Controller::showGainsLosses()
 
     for (WalletDTO *wallet : allWallets)
     {
-        vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(wallet->getWalletId());
-        double totalInvested = 0.0;
-        double totalReceived = 0.0;
+        double gainLoss = businessLogic->calculateGainLoss(wallet->getWalletId());
 
-        for (MovementDTO *mov : history)
-        {
-            OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
-            double quote = quoteObj ? quoteObj->getQuote() : 0.0;
-            if (quoteObj)
-                delete quoteObj;
-
-            if (mov->getOperationType() == 'C')
-            { // Compra
-                totalInvested += (mov->getQuantity() * quote);
-            }
-            else if (mov->getOperationType() == 'V')
-            { // Venda
-                totalReceived += (mov->getQuantity() * quote);
-            }
-            delete mov; // Liberar DTO do movimento
-        }
-
-        double gainLoss = totalReceived - totalInvested;
         const string ANSI_RED = "\033[0;31m";
         const string ANSI_GREEN = "\033[1;32m";
         const string ANSI_RESET = "\033[0m";
@@ -676,13 +607,11 @@ void Controller::showGainsLosses()
              << setw(30) << wallet->getHolderName()
              << setw(30) << wallet->getExchangeName()
              << color << fixed << setprecision(2) << setw(20) << gainLoss << ANSI_RESET << endl;
-    }
-    cout << Utils::replicate("=", 100) << endl;
 
-    for (WalletDTO *wallet : allWallets)
-    {
-        delete wallet;
-    } // Liberar DTOs das carteiras
+        delete wallet; // liberar memória
+    }
+
+    cout << Utils::replicate("=", 100) << endl;
 }
 
 void Controller::showHelpText()
