@@ -35,9 +35,9 @@ Funcionalidades Principais:
 
 Dicas de Uso:
 - Sempre forneça dados válidos. O sistema fará validações básicas para IDs e quantidades.
-- Para datas, use o formato YYYY.MM.DD.
+- Para datas, use o formato DD.MM.YYYY
 - Para consultas de banco de dados, certifique-se de que o MariaDB está rodando e as credenciais estão corretas.
 
-Em caso de dúvidas ou problemas, consulte a tela de Créditos para informações de contato do desenvolvedor.
+Em caso de dúvidas ou problemas, consulte a tela de Créditos para informações do desenvolvedor.
 
 Aproveite o FT_Coin para ter mais controle sobre suas finanças de criptomoedas!
