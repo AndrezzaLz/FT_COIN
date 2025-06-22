@@ -1,14 +1,14 @@
 #include "Controller.hpp"
-#include <cctype>    // Para toupper
-#include <iomanip>   // Para formatação de saída
-#include <limits>    // Para numeric_limits
-#include <stdexcept> // Para exceções
-#include <algorithm> // Para std::sort e std::max
+#include <cctype>
+#include <iomanip>
+#include <limits>
+#include <stdexcept>
+#include <algorithm>
 
-// Inclui as implementações concretas dos DAOs para instanciar
 #include "WalletMemDAO.hpp"
 #include "MovementMemDAO.hpp"
 #include "OracleMemDAO.hpp"
+#include "BusinessLogic.hpp"
 
 #ifdef USE_MARIADB
 #include "ServerDBConnection.hpp"
@@ -17,8 +17,6 @@
 #include "OracleDBDAO.hpp"
 #endif
 
-// Usar std:: para evitar 'using namespace std;' em .cpp se preferir
-// Alternativamente, para simplificar neste arquivo:
 using namespace std;
 
 Controller::Controller(DataBaseSelector dataBaseSelector)
@@ -38,6 +36,7 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
         walletDAO = new WalletMemDAO(memoryDBConnection);
         movementDAO = new MovementMemDAO(memoryDBConnection);
         oracleDAO = new OracleMemDAO(memoryDBConnection);
+        businessLogic = new BusinessLogic(walletDAO, movementDAO, oracleDAO);
 
         populateDemoData();
     }
@@ -52,8 +51,9 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
             walletDAO = new WalletDBDAO(serverDBConnection);
             movementDAO = new MovementDBDAO(serverDBConnection);
             oracleDAO = new OracleDBDAO(serverDBConnection);
+            businessLogic = new BusinessLogic(walletDAO, movementDAO, oracleDAO);
             }
-        catch (const exception& e) 
+        catch (const exception& e)
             {
             cerr << "ERRO FATAL: Falha ao conectar ao MariaDB ou instanciar DAOs: " << e.what() << endl;
             exit(1);
@@ -62,7 +62,7 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
         cerr << "ERRO: O programa nao foi compilado com suporte a MariaDB." << endl;
         exit(1);
 #endif
-    }  
+    }
     break;
     default:
     {
@@ -79,6 +79,8 @@ Controller::~Controller()
     movementDAO = nullptr;
     delete oracleDAO;
     oracleDAO = nullptr;
+    delete businessLogic;
+    businessLogic = nullptr;
 
     if (memoryDBConnection)
     {
@@ -101,7 +103,8 @@ void Controller::start()
     const string ANSI_RED = "\033[0;31m";
     const string ANSI_RESET = "\033[0m";
 
-vector<string> mainMenuItems = {"Carteira", "Movimentacao", "Relatorios", "Ajuda", ANSI_RED + "Sair do Programa" + ANSI_RESET};    vector<void (Controller::*)()> functions = {
+    vector<string> mainMenuItems = {"Carteira", "Movimentacao", "Relatorios", "Ajuda", ANSI_RED + "Sair do Programa" + ANSI_RESET};
+    vector<void (Controller::*)()> functions = {
         &Controller::actionWallet,
         &Controller::actionMovement,
         &Controller::actionReports,
@@ -152,7 +155,6 @@ void Controller::actionHelp()
 
 void Controller::actionAbout()
 {
-    // Implementação da tela de créditos no showCredits()
     showCredits();
 }
 
@@ -162,7 +164,7 @@ void Controller::launchActions(string title, vector<string> menuItens, vector<vo
     {
         Menu menu(menuItens, title, "Sua opcao: ");
         menu.setSymbol("*");
-        menu.setZeroForLastOpt(true); // "Voltar" geralmente é a última opção e pode ser 0
+        menu.setZeroForLastOpt(true);
 
         while (int choice = menu.getChoice())
         {
@@ -182,14 +184,13 @@ void Controller::launchActions(string title, vector<string> menuItens, vector<vo
     }
 }
 
-// *** Implementações das funcionalidades da Carteira ***
 void Controller::newWallet()
 {
     Utils::printMessage("Incluir Nova Carteira");
     string holderName, exchangeName;
 
     cout << "Nome do Titular: ";
-    getline(cin >> ws, holderName); // ws para consumir nova linha pendente
+    getline(cin >> ws, holderName);
 
     cout << "Nome da Corretora: ";
     getline(cin >> ws, exchangeName);
@@ -201,7 +202,7 @@ void Controller::newWallet()
             Utils::printMessage("Nome do titular ou corretora nao podem ser vazios. Operacao cancelada.");
             return;
         }
-        WalletDTO *newWallet = new WalletDTO(0, holderName, exchangeName); // ID 0 para ser definido pelo DAO
+        WalletDTO *newWallet = new WalletDTO(0, holderName, exchangeName);
         walletDAO->addWallet(newWallet);
         Utils::printMessage("Carteira adicionada com sucesso!");
     }
@@ -227,12 +228,10 @@ void Controller::retrieveWallet()
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "ID invalido. Digite um numero inteiro positivo: ";
     }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpa buffer
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    // 1. Chama o método do DAO para obter um ponteiro para uma NOVA cópia do objeto.
     WalletDTO *wallet = walletDAO->getWalletById(walletId);
 
-    // 2. Verifica se a carteira foi encontrada.
     if (wallet)
     {
         Utils::printMessage("Carteira Encontrada:");
@@ -240,7 +239,6 @@ void Controller::retrieveWallet()
         cout << "Titular: " << wallet->getHolderName() << endl;
         cout << "Corretora: " << wallet->getExchangeName() << endl;
 
-        // 3. IMPORTANTE: Libera a memória da cópia que foi criada.
         delete wallet;
     }
     else
@@ -248,6 +246,7 @@ void Controller::retrieveWallet()
         Utils::printMessage("Carteira com ID " + to_string(walletId) + " nao encontrada.");
     }
 }
+
 void Controller::editWallet()
 {
     Utils::printMessage("Editar Carteira");
@@ -276,7 +275,6 @@ void Controller::editWallet()
         cout << "Nova Corretora (<Enter> para manter " << existingWallet->getExchangeName() << "): ";
         getline(cin, newExchangeName);
 
-        // Criar um novo DTO com os dados atualizados
         string finalHolderName = newHolderName.empty() ? existingWallet->getHolderName() : newHolderName;
         string finalExchangeName = newExchangeName.empty() ? existingWallet->getExchangeName() : newExchangeName;
 
@@ -354,7 +352,6 @@ void Controller::listWalletsById()
         return;
     }
 
-    // Ordenar por ID (já deve ser o padrão se o DAO for bem feito, mas podemos garantir)
     sort(wallets.begin(), wallets.end(), [](WalletDTO *a, WalletDTO *b)
          { return a->getWalletId() < b->getWalletId(); });
 
@@ -383,7 +380,6 @@ void Controller::listWalletsByHolderName()
         return;
     }
 
-    // Ordenar por Nome do Titular
     sort(wallets.begin(), wallets.end(), [](WalletDTO *a, WalletDTO *b)
          { return a->getHolderName() < b->getHolderName(); });
 
@@ -401,7 +397,6 @@ void Controller::listWalletsByHolderName()
     cout << decorator << endl;
 }
 
-// *** Implementações das funcionalidades de Movimentação ***
 void Controller::registerPurchase()
 {
     Utils::printMessage("Registrar Compra de Moeda");
@@ -435,7 +430,7 @@ void Controller::registerPurchase()
     double quantity;
     cout << "Quantidade Comprada: ";
     while (!(cin >> quantity) || quantity <= 0)
-    { // Compra deve ter quantidade positiva
+    {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Quantidade invalida. Digite um valor numerico positivo: ";
@@ -491,7 +486,7 @@ void Controller::registerSale()
     double quantity;
     cout << "Quantidade Vendida: ";
     while (!(cin >> quantity) || quantity <= 0)
-    { // Venda deve ter quantidade positiva
+    {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Quantidade invalida. Digite um valor numerico positivo: ";
@@ -514,10 +509,9 @@ void Controller::registerSale()
     }
 }
 
-// *** Implementações das funcionalidades de Relatórios ***
 void Controller::showWalletBalance()
 {
-    Utils::printMessage("Exibir Saldo Atual da Carteira");
+    Utils::printMessage("Exibir Saldo da Carteira");
     int walletId;
     cout << "Digite o ID da Carteira: ";
     while (!(cin >> walletId) || walletId <= 0)
@@ -535,40 +529,21 @@ void Controller::showWalletBalance()
         return;
     }
 
-    vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(walletId);
-    double balance = 0.0;
-
-    for (MovementDTO *mov : history)
-    {
-        OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
-        double quote = quoteObj ? quoteObj->getQuote() : 0.0; // Assume cotação 0 se não encontrar (ou joga erro)
-        if (quoteObj)
-            delete quoteObj; // Liberar memória do DTO da cotação
-
-        if (mov->getOperationType() == 'C')
-        { // Compra
-            balance -= (mov->getQuantity() * quote);
-        }
-        else if (mov->getOperationType() == 'V')
-        { // Venda
-            balance += (mov->getQuantity() * quote);
-        }
-    }
+    double saldo = businessLogic->calculateWalletBalance(walletId);
 
     cout << Utils::replicate("=", 80) << endl;
-    cout << "Saldo da Carteira " << targetWallet->getHolderName() << " (ID: " << targetWallet->getWalletId() << "): ";
-    cout << fixed << setprecision(2) << balance << endl;
+    cout << "Saldo da Carteira " << targetWallet->getHolderName()
+         << " (ID: " << targetWallet->getWalletId() << "): R$ "
+         << fixed << setprecision(2) << saldo << endl;
     cout << Utils::replicate("=", 80) << endl;
 
-    for (MovementDTO *mov : history)
-    {
-        delete mov;
-    } 
+    delete targetWallet;
 }
 
 void Controller::showMovementHistory()
 {
     Utils::printMessage("Exibir Historico de Movimentacao da Carteira");
+    
     int walletId;
     cout << "Digite o ID da Carteira: ";
     while (!(cin >> walletId) || walletId <= 0)
@@ -586,44 +561,9 @@ void Controller::showMovementHistory()
         return;
     }
 
-    vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(walletId);
+    businessLogic->detailedWalletReport(walletId);
 
-    cout << Utils::replicate("=", 90) << endl;
-    cout << "Historico de Movimentacao para Carteira: " << targetWallet->getHolderName() << " (ID: " << targetWallet->getWalletId() << ")" << endl;
-    cout << Utils::replicate("=", 90) << endl;
-
-    if (history.empty())
-    {
-        Utils::printMessage("Nenhuma movimentacao para esta carteira.");
-    }
-    else
-    {
-        cout << left << setw(10) << "ID Mov." << setw(15) << "Data Op." << setw(15) << "Tipo" << setw(15) << "Quantidade" << setw(15) << "Cotacao" << setw(15) << "Valor Total" << endl;
-        cout << Utils::replicate("-", 90) << endl;
-        for (MovementDTO *mov : history)
-        {
-            OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
-            double quote = quoteObj ? quoteObj->getQuote() : 0.0;
-            if (quoteObj)
-                delete quoteObj;
-
-            double totalValue = mov->getQuantity() * quote;
-            string typeStr = (mov->getOperationType() == 'C') ? "Compra" : "Venda";
-
-            cout << left << setw(10) << mov->getMovementId()
-                 << setw(15) << mov->getDate()
-                 << setw(15) << typeStr
-                 << fixed << setprecision(3) << setw(15) << mov->getQuantity()
-                 << fixed << setprecision(2) << setw(15) << quote
-                 << fixed << setprecision(2) << setw(15) << totalValue << endl;
-        }
-    }
-    cout << Utils::replicate("=", 90) << endl;
-
-    for (MovementDTO *mov : history)
-    {
-        delete mov;
-    }
+    delete targetWallet;
 }
 
 void Controller::showGainsLosses()
@@ -643,29 +583,8 @@ void Controller::showGainsLosses()
 
     for (WalletDTO *wallet : allWallets)
     {
-        vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(wallet->getWalletId());
-        double totalInvested = 0.0;
-        double totalReceived = 0.0;
+        double gainLoss = businessLogic->calculateGainLoss(wallet->getWalletId());
 
-        for (MovementDTO *mov : history)
-        {
-            OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
-            double quote = quoteObj ? quoteObj->getQuote() : 0.0;
-            if (quoteObj)
-                delete quoteObj;
-
-            if (mov->getOperationType() == 'C')
-            { // Compra
-                totalInvested += (mov->getQuantity() * quote);
-            }
-            else if (mov->getOperationType() == 'V')
-            { // Venda
-                totalReceived += (mov->getQuantity() * quote);
-            }
-            delete mov; // Liberar DTO do movimento
-        }
-
-        double gainLoss = totalReceived - totalInvested;
         const string ANSI_RED = "\033[0;31m";
         const string ANSI_GREEN = "\033[1;32m";
         const string ANSI_RESET = "\033[0m";
@@ -676,19 +595,16 @@ void Controller::showGainsLosses()
              << setw(30) << wallet->getHolderName()
              << setw(30) << wallet->getExchangeName()
              << color << fixed << setprecision(2) << setw(20) << gainLoss << ANSI_RESET << endl;
-    }
-    cout << Utils::replicate("=", 100) << endl;
 
-    for (WalletDTO *wallet : allWallets)
-    {
         delete wallet;
-    } // Liberar DTOs das carteiras
+    }
+
+    cout << Utils::replicate("=", 100) << endl;
 }
 
 void Controller::showHelpText()
 {
     Utils::printMessage("Texto de Ajuda do FT_Coin");
-    // Confirmar que "help.txt" existe e está no diretório correto
     unique_ptr<TextFromFile> textFromFile(new TextFromFile("help.txt"));
     Utils::printFramedMessage(textFromFile->getFileContent(), "-", 100);
 }
@@ -697,7 +613,7 @@ void Controller::showCredits()
 {
     string text = "";
     text += SysInfo::getFullVersion() + "\n";
-    text += "Desenvolvido por: Andrezza,, Henrique, Sidinei, Yasmin\n"; // Adapte aqui com os nomes dos integrantes
+    text += "Desenvolvido por: Andrezza,Bianca, Henrique, Sidinei, Yasmin\n";
     text += SysInfo::getInstitution() + "\n";
     text += SysInfo::getDepartment() + "\n";
     text += "Copyright " + SysInfo::getAuthor() + " " + SysInfo::getDate() + "\n";
@@ -705,12 +621,10 @@ void Controller::showCredits()
     Utils::printFramedMessage(text, "=", 100);
 }
 
-// *** Dados de Demonstração ***
 void Controller::populateDemoData()
 {
     Utils::printMessage("Populando dados de demonstracao (apenas para DB em memoria)...");
 
-    //Carteiras
     WalletDTO *w1 = new WalletDTO(0, "Maria Silva", "Binance");
     walletDAO->addWallet(w1);
     WalletDTO *w2 = new WalletDTO(0, "João Pereira", "Coinbase");
@@ -718,33 +632,24 @@ void Controller::populateDemoData()
     WalletDTO *w3 = new WalletDTO(0, "Ana Souza", "Mercado Bitcoin");
     walletDAO->addWallet(w3);
 
-    // Assegura que os IDs foram setados pelo DAO em memória
     int mariaId = walletDAO->getAllWallets().at(0)->getWalletId();
     int joaoId = walletDAO->getAllWallets().at(1)->getWalletId();
     int anaId = walletDAO->getAllWallets().at(2)->getWalletId();
 
-    //Oraculo (Cotações)
     oracleDAO->saveQuote(new OracleDTO(Date(10, 5, 2024), 10000.00));
     oracleDAO->saveQuote(new OracleDTO(Date(11, 5, 2024), 10500.00));
     oracleDAO->saveQuote(new OracleDTO(Date(12, 5, 2024), 9800.00));
     oracleDAO->saveQuote(new OracleDTO(Date(13, 5, 2024), 11000.00));
     oracleDAO->saveQuote(new OracleDTO(Date(14, 5, 2024), 10200.00));
     oracleDAO->saveQuote(new OracleDTO(Date(15, 5, 2024), 10800.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(16, 5, 2024), 11500.00)); // Cotação alta
-    oracleDAO->saveQuote(new OracleDTO(Date(17, 5, 2024), 9500.00));  // Cotação baixa
+    oracleDAO->saveQuote(new OracleDTO(Date(16, 5, 2024), 11500.00));
+    oracleDAO->saveQuote(new OracleDTO(Date(17, 5, 2024), 9500.00));
 
-    // Movimentações
-    // Maria: Compra 1.5 em 10/05/2024 (1.5 * 10000 = 15000)
     movementDAO->registerTransaction(new MovementDTO(0, mariaId, Date(10, 5, 2024), 'C', 1.5));
-    // Maria: Vende 0.5 em 13/05/2024 (0.5 * 11000 = 5500)
     movementDAO->registerTransaction(new MovementDTO(0, mariaId, Date(13, 5, 2024), 'V', 0.5));
-    // João: Compra 2.0 em 11/05/2024 (2.0 * 10500 = 21000)
     movementDAO->registerTransaction(new MovementDTO(0, joaoId, Date(11, 5, 2024), 'C', 2.0));
-    // João: Vende 1.0 em 17/05/2024 (1.0 * 9500 = 9500) -> provavel perda
     movementDAO->registerTransaction(new MovementDTO(0, joaoId, Date(17, 5, 2024), 'V', 1.0));
-    // Ana: Compra 0.8 em 12/05/2024 (0.8 * 9800 = 7840)
     movementDAO->registerTransaction(new MovementDTO(0, anaId, Date(12, 5, 2024), 'C', 0.8));
-    // Ana: Vende 0.3 em 16/05/2024 (0.3 * 11500 = 3450) -> provavel ganho
     movementDAO->registerTransaction(new MovementDTO(0, anaId, Date(16, 5, 2024), 'V', 0.3));
 
     Utils::printMessage("Dados de demonstracao populados com sucesso!");

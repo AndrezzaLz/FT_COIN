@@ -3,27 +3,26 @@
 
 #include <string>
 #include <vector>
-#include <iostream> // Para cin/cout
+#include <iostream> 
 
-// Inclui seus DAOs abstratos
 #include "AbstractWalletDAO.hpp"
 #include "AbstractMovementDAO.hpp"
 #include "AbstractOracleDAO.hpp"
 
-// Inclui conexões e outras dependências
 #include "DataBaseSelector.hpp"
 #include "MemoryDBConnection.hpp"
 #include "ServerDBConnection.hpp"
-#include "Menu.h" // A classe Menu
+#include "BusinessLogic.hpp"
+#include "Menu.h" 
 #include "Utils.h"
 #include "SysInfo.h"
 #include "TextFromFile.h"
 
-// Inclui DTOs necessários para as operações do Controller
 #include "WalletDTO.hpp"
 #include "MovementDTO.hpp"
 #include "OracleDTO.hpp"
 #include "Date.hpp"
+
 
 class Controller final {
 private:
@@ -32,6 +31,7 @@ private:
     AbstractWalletDAO *walletDAO;
     AbstractMovementDAO *movementDAO;
     AbstractOracleDAO *oracleDAO;
+    BusinessLogic *businessLogic;
 
     // Métodos para as ações dos menus principais
     void actionWallet();

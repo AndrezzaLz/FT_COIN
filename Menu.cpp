@@ -1,30 +1,5 @@
-/* ********************************************************************************
- * Prof. Dr. Andre F. de Angelis
- * School of Technology
- * University of Campinas (Unicamp)
- * 1st Semester - 2024
- * ********************************************************************************
- * This file is part of a C++ teaching project directed to undergraduate students
- * of Information System; and System Analyzes and Development courses of the School
- * of Technology of Unicamp.
- * The project is a simplified cash flow control intended to demonstrate C++
- * resources and capabilities. There are non-optimized parts and some unrealistic
- * pieces of code in it, as well as advanced function pointers and unconventional
- * use of data structures, according to the project objectives.
- * The cash flow program is not a real application. Use its code to learn C++.
- * ********************************************************************************
- * g++ (GCC) 13.3.1 20240522 (Red Hat 13.3.1-1)
- * Eclipse Version: 2023-12 (4.30.0) Build id: 20231201-2043
- * Fedora Linux 39 + KDE
- * ********************************************************************************
- * Copyright (C) 2024 Andre F. de Angelis
- * ********************************************************************************
- * Menu.cpp
- * ********************************************************************************
- */
-
 #include <math.h>
-
+#include <limits>
 #include "Menu.h"
 
 Menu::Menu(vector<string> &itens, string title, string message) :
@@ -43,42 +18,56 @@ void Menu::setDecorator(const string &symbol, int width)
 	}
 
 const int Menu::getChoice()
-	{
+{
 	unsigned long choice;
 	bool firstTime = true;
 	string decorator = makeDecorator();
 
 	do
-		{
+	{
 		if (repeatList || firstTime)
-			{
+		{
 			unsigned long index = 0;
 			cout << decorator << endl;
 			cout << "\033[1m" << title << "\033[0m" << endl;	
 			cout << decorator << endl;
 
 			for (index = 0; index < ((itens.size() - (zeroForLastOpt ? 1 : 0))); index++)
-				{
+			{
 				cout << (index + (zeroForLastOpt ? 1 : 00)) << " - " << itens.at(index) << endl;
-				}
+			}
 			cout << decorator << endl;
 
 			if (zeroForLastOpt)
-				{
+			{
 				cout << 0 << " - " << itens.at(index) << endl;
 				cout << decorator << endl;
-				}
+			}
 
 			firstTime = false;
-			}
-		cout << message << endl;
-		cin >> choice;
 		}
+		
+		cout << message;
+		
+		cin >> choice;
+
+		if (cin.fail()) {
+			cout << "\nEntrada invalida. Por favor, digite apenas numeros." << endl;
+			cin.clear(); 
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			choice = -1; 
+		}
+
+	}
 	while (isNotAValidChoice(choice));
-	cin.ignore();
+
+	if (!cin.fail()) {
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	}
 
 	return (choice);
-	}
+}
+
 
 const string Menu::makeDecorator()
 	{
@@ -179,4 +168,3 @@ void Menu::setZeroForLastOpt(bool zeroForLastOpt)
 Menu::~Menu()
 	{
 	}
-

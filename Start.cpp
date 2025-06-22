@@ -2,14 +2,12 @@
 #include <string>
 #include <exception>
 #include <memory>
-
-// Inclua os cabeçalhos das suas classes principais
+#include <limits> 
 #include "Controller.hpp"
 #include "DataBaseSelector.hpp"
 #include "SysInfo.h"
 #include "Utils.h"
 
-// Funções de boas-vindas e encerramento
 void welcome();
 void bye();
 
@@ -17,13 +15,38 @@ int main(int argc, char *argv[])
 {
     welcome();
 
+    DataBaseSelector selector;
+    int choice = -1;
+
+    std::cout << "Selecione o modo de persistencia:" << std::endl;
+    std::cout << "1. Banco de Dados em Memoria (rapido, dados perdidos ao sair)" << std::endl;
+    std::cout << "2. Banco de Dados MariaDB (requer servidor, dados permanentes)" << std::endl;
+    
+    while (true) {
+        std::cout << "Sua opcao: ";
+        std::cin >> choice;
+
+        if (std::cin.good() && (choice == 1 || choice == 2)) {
+            break; 
+        } else {
+            std::cout << "Opcao invalida. Por favor, digite 1 ou 2." << std::endl;
+            std::cin.clear(); 
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+        }
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+
+    if (choice == 1) {
+        selector = DataBaseSelector::MEMORY;
+        Utils::printMessage("Modo de persistencia em MEMORIA selecionado.");
+    } else {
+        selector = DataBaseSelector::MARIADB;
+    }
+
     try
     {
-        // Instancia o Controller. Para o vídeo, use DataBaseSelector::MEMORY.
-        // Para usar o MariaDB, mude para DataBaseSelector::MARIADB.
-    std::unique_ptr<Controller> appController(new Controller(DataBaseSelector::MEMORY));
-    appController->start();        
-        // Inicia o loop principal do programa
+        std::unique_ptr<Controller> appController(new Controller(selector));
+        
         appController->start();
     }
     catch (const std::exception &e)
@@ -36,7 +59,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// Implementação das funções
 void welcome()
 {
     Utils::printMessage(SysInfo::getFullVersion());

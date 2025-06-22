@@ -11,9 +11,9 @@ OracleMemDAO::~OracleMemDAO() {}
 OracleDTO* OracleMemDAO::getQuoteByDate(Date date) {
     auto it = memoryDBConnection->getOracleMap().find(date.getIsoFormat());
     if (it != memoryDBConnection->getOracleMap().end()) {
-        return it->second;
+        return new OracleDTO(*(it->second));
     }
-    return nullptr; // Retorna nullptr se a data não for encontrada
+    return nullptr;
 }
 
 void OracleMemDAO::saveQuote(OracleDTO* quote) {

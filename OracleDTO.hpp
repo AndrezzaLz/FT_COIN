@@ -12,6 +12,7 @@ private:
 
 public:
     OracleDTO(Date date, double quote);
+    OracleDTO(const OracleDTO& other) = default;
     virtual ~OracleDTO();
 
     Date getDate() const;

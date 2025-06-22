@@ -31,33 +31,22 @@ void MovementDBDAO::registerTransaction(MovementDTO *movement)
         }
     }
 
-vector<MovementDTO*> MovementDBDAO::getHistoryByWalletId(int walletId)
+vector<MovementDTO*> MovementMemDAO::getHistoryByWalletId(int walletId)
+{
+    vector<MovementDTO*> history; 
+    for (MovementDTO* movementPtr : memoryDBConnection->getMovementList())
     {
-    vector<MovementDTO*> historyDB;
-    try
+        if (movementPtr->getWalletId() == walletId)
         {
-        unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_getHistory));
-        stmnt->setInt(1, walletId);
-        sql::ResultSet *res = stmnt->executeQuery();
-
-        while (res->next())
-            {
-            int movementId = res->getInt(1);
-            int WalletId = res->getInt(2);
-            string dateStr(res->getString(3));
-            Date date(dateStr);
-            char operationType = res->getString(4).at(0);
-            double quantity = res->getDouble(5);
-
-            MovementDTO *buffer = new MovementDTO(movementId, walletId, date, operationType, quantity);
-            historyDB.push_back(buffer);
-            }
+            history.push_back(new MovementDTO(*movementPtr));
         }
-    catch(sql::SQLException &e)
-        {
-        cerr << "Erro ao buscar historico: " << e.what() << endl;
-        }
-        return historyDB;
     }
+    
+    sort(history.begin(), history.end(), [](MovementDTO* a, MovementDTO* b) 
+    {
+        return a->getDate() < b->getDate(); 
+    });
+
+    return history; 
 
 #endif

@@ -7,7 +7,6 @@ MovementDTO::MovementDTO(int movementId, int walletId, const Date& date, char op
         if (quantity < 0) {
             throw invalid_argument("A quantidade nao pode ser negativa.");
     }
-    // Poderia haver mais validações aqui (data, tipo de operação, etc.)
 }
 
 MovementDTO::~MovementDTO()

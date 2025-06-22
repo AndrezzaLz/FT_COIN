@@ -15,7 +15,6 @@
 #include <unordered_map>
 #include <iomanip>
 #include <algorithm>
-#include <memory>
 
 class BusinessLogic {
 private:
@@ -27,13 +26,12 @@ public:
     BusinessLogic(AbstractWalletDAO* wDAO, AbstractMovementDAO* mDAO, AbstractOracleDAO* oDAO)
         : walletDAO(wDAO), movementDAO(mDAO), oracleDAO(oDAO) {}
 
-    // Calculate wallet balance based on movements and quotes
     double calculateWalletBalance(int walletId) {
         std::vector<MovementDTO*> movements = movementDAO->getHistoryByWalletId(walletId);
         double balance = 0.0;
 
         for (const MovementDTO* mov : movements) {
-            std::unique_ptr<OracleDTO> quote(oracleDAO->getQuoteByDate(mov->getDate()));
+            OracleDTO* quote = oracleDAO->getQuoteByDate(mov->getDate());
             double value = mov->getQuantity() * quote->getQuote();
 
             if (mov->getOperationType() == 'C') {
@@ -41,12 +39,13 @@ public:
             } else if (mov->getOperationType() == 'V') {
                 balance += value;
             }
+
+            delete quote;  // liberar memória
         }
 
         return balance;
     }
 
-    // Calculate gain/loss of the wallet considering current value of coins
     double calculateGainLoss(int walletId) {
         std::vector<MovementDTO*> movements = movementDAO->getHistoryByWalletId(walletId);
         if (movements.empty()) return 0.0;
@@ -56,7 +55,7 @@ public:
         Date latestDate;
 
         for (const MovementDTO* mov : movements) {
-            std::unique_ptr<OracleDTO> quote(oracleDAO->getQuoteByDate(mov->getDate()));
+            OracleDTO* quote = oracleDAO->getQuoteByDate(mov->getDate());
             double value = mov->getQuantity() * quote->getQuote();
 
             if (mov->getOperationType() == 'C') {
@@ -68,17 +67,19 @@ public:
             if (mov->getDate() > latestDate) {
                 latestDate = mov->getDate();
             }
+
+            delete quote;  // liberar memória
         }
 
-        std::unique_ptr<OracleDTO> currentQuote(oracleDAO->getQuoteByDate(latestDate));
+        OracleDTO* currentQuote = oracleDAO->getQuoteByDate(latestDate);
         for (const MovementDTO* mov : movements) {
             currentValue += mov->getQuantity() * currentQuote->getQuote();
         }
+        delete currentQuote;
 
         return currentValue - totalCost;
     }
 
-    // Simple report: list wallets by ID and holder name, sorted by ID
     void reportWallets() {
         std::vector<WalletDTO*> wallets = walletDAO->getAllWallets();
 
@@ -92,7 +93,6 @@ public:
         }
     }
 
-    // Detailed report: balance and transaction history of a wallet
     void detailedWalletReport(int walletId) {
         WalletDTO* wallet = walletDAO->getWalletById(walletId);
         std::vector<MovementDTO*> movements = movementDAO->getHistoryByWalletId(walletId);
@@ -103,7 +103,7 @@ public:
         std::cout << "Date\t\tType\tQuantity\tQuote\t\tValue\n";
 
         for (const MovementDTO* mov : movements) {
-            std::unique_ptr<OracleDTO> quote(oracleDAO->getQuoteByDate(mov->getDate()));
+            OracleDTO* quote = oracleDAO->getQuoteByDate(mov->getDate());
             double value = mov->getQuantity() * quote->getQuote();
 
             std::cout << mov->getDate() << "\t"
@@ -111,6 +111,8 @@ public:
                       << mov->getQuantity() << "\t\t"
                       << std::fixed << std::setprecision(2) << quote->getQuote() << "\t\t"
                       << value << "\n";
+
+            delete quote;  // liberar memória
         }
 
         double balance = calculateWalletBalance(walletId);

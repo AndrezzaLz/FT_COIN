@@ -85,12 +85,18 @@ bool Date::operator<=(const Date &other) const
 	}
 
 ostream& operator<<(ostream &os, const Date &date)
-	{
-	os << setfill('0') << setw(4) << date.year << ".";
-	os << setfill('0') << setw(2) << date.month << ".";
-	os << setfill('0') << setw(2) << date.day;
-	return os;
-	}
+{
+    char original_fill = os.fill();
+
+    os << setfill('0') << setw(4) << date.year << ".";
+    os << setfill('0') << setw(2) << date.month << ".";
+    os << setfill('0') << setw(2) << date.day;
+
+    os.fill(original_fill);
+
+    return os;
+}
+
 
 istream& operator>>(std::istream &is, Date &date)
 	{

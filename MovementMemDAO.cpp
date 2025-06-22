@@ -20,20 +20,20 @@ void MovementMemDAO::registerTransaction(MovementDTO* movement)
     }
 
 vector<MovementDTO*> MovementMemDAO::getHistoryByWalletId(int walletId)
+{
+    vector<MovementDTO*> history;
+    for(MovementDTO* movementPtr : memoryDBConnection->getMovementList())
     {
-    vector<MovementDTO*> history;    
-    for(MovementDTO* movement : memoryDBConnection->getMovementList())
+        if (movementPtr->getWalletId() == walletId)
         {
-        if (movement->getWalletId() == walletId)
-            {
-            history.push_back(movement);    
-            }    
+            history.push_back(new MovementDTO(*movementPtr));
         }
+    }
         
     sort(history.begin(), history.end(), [](MovementDTO* a, MovementDTO* b) 
-        {
-    return a->getDate() < b->getDate(); 
-        });
-    return (history);
-    }
+    {
+        return a->getDate() < b->getDate(); 
+    });
+    return history; 
+}
  

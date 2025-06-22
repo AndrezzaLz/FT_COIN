@@ -1,6 +1,6 @@
 #include "SysInfo.h"
 
-const string SysInfo::author = "Andrezza Zozzoro, Sidinei Junior, Henrique Saito, Bianca Oshiro , Yasmin Inoue. Parte do trabalho foi reutilizado do projeto Agregador do professor Angelis.";
+const string SysInfo::author = "Andrezza Zozzoro, Bianca Oshiro, Sidinei Junior, Henrique Saito, Yasmin Inoue. Parte do trabalho foi reutilizado do projeto Agregador do professor Angelis.";
 const string SysInfo::date = "2025, Junho";
 const string SysInfo::department = "Faculdade de Tecnologia - Limeira/SP";
 const string SysInfo::institution = "Universidade Estadual de Campinas (Unicamp)";

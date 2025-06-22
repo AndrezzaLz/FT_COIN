@@ -16,7 +16,8 @@ private:
 public:
     MovementDTO(int movementId, int walletId, const Date& date, char operationType, double quantity);
     virtual ~MovementDTO();
-
+    MovementDTO(const MovementDTO& other) = default;
+    
     int getMovementId() const;
     int getWalletId() const;
     Date getDate() const;
