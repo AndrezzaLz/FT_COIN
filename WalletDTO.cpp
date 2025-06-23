@@ -5,11 +5,11 @@ WalletDTO::WalletDTO(int walletId, const string &holderName, const string &excha
 {
     if (holderName.empty())
     {
-        throw invalid_argument("Nome do titular não pode estar vazio.");
+        throw invalid_argument("Nome do titular nao pode estar vazio.");
     }
     if (exchangeName.empty())
     {
-        throw invalid_argument("Corretora não pode estar vazia.");
+        throw invalid_argument("Corretora nao pode estar vazia.");
     }
 }
 
