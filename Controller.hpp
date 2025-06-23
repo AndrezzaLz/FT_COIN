@@ -59,6 +59,7 @@ private:
     void showWalletBalance();
     void showMovementHistory();
     void showGainsLosses();
+    void exportHistoryToCSV(); // Funcionalidade nova
 
     // Métodos específicos para Ajuda
     void showHelpText();
@@ -73,4 +74,4 @@ public:
     void start();
 };
 
-#endif // CONTROLLER_HPP
+#endif 

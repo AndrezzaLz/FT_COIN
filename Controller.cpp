@@ -4,6 +4,7 @@
 #include <limits>
 #include <stdexcept>
 #include <algorithm>
+#include <fstream>
 
 #include "WalletMemDAO.hpp"
 #include "MovementMemDAO.hpp"
@@ -46,18 +47,18 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
     {
 #ifdef USE_MARIADB
         try
-            {
+        {
             serverDBConnection = new ServerDBConnection();
             walletDAO = new WalletDBDAO(serverDBConnection);
             movementDAO = new MovementDBDAO(serverDBConnection);
             oracleDAO = new OracleDBDAO(serverDBConnection);
             businessLogic = new BusinessLogic(walletDAO, movementDAO, oracleDAO);
-            }
-        catch (const exception& e)
-            {
+        }
+        catch (const exception &e)
+        {
             cerr << "ERRO FATAL: Falha ao conectar ao MariaDB ou instanciar DAOs: " << e.what() << endl;
             exit(1);
-            }
+        }
 #else
         cerr << "ERRO: O programa nao foi compilado com suporte a MariaDB." << endl;
         exit(1);
@@ -95,7 +96,6 @@ Controller::~Controller()
         serverDBConnection = nullptr;
     }
 #endif
-    
 }
 
 void Controller::start()
@@ -136,14 +136,17 @@ void Controller::actionMovement()
 
 void Controller::actionReports()
 {
-    vector<string> menuItens = {"Exibir Saldo da Carteira", "Exibir Historico de Movimentacao", "Exibir Ganhos/Perdas", "Voltar"};
+    // Adicionamos a nova opção "Exportar"
+    vector<string> menuItens = {"Exibir Saldo da Carteira", "Exibir Historico de Movimentacao", "Exibir Ganhos/Perdas", "Exportar Historico para CSV", "Voltar"};
+
     vector<void (Controller::*)()> functions = {
         &Controller::showWalletBalance,
         &Controller::showMovementHistory,
-        &Controller::showGainsLosses};
+        &Controller::showGainsLosses,
+        &Controller::exportHistoryToCSV // <-- PONTEIRO PARA A NOVA FUNÇÃO
+    };
     launchActions("Relatorios", menuItens, functions);
 }
-
 void Controller::actionHelp()
 {
     vector<string> menuItens = {"Mostrar Texto de Ajuda", "Mostrar Creditos", "Voltar"};
@@ -543,7 +546,7 @@ void Controller::showWalletBalance()
 void Controller::showMovementHistory()
 {
     Utils::printMessage("Exibir Historico de Movimentacao da Carteira");
-    
+
     int walletId;
     cout << "Digite o ID da Carteira: ";
     while (!(cin >> walletId) || walletId <= 0)
@@ -653,4 +656,73 @@ void Controller::populateDemoData()
     movementDAO->registerTransaction(new MovementDTO(0, anaId, Date(16, 5, 2024), 'V', 0.3));
 
     Utils::printMessage("Dados de demonstracao populados com sucesso!");
+}
+
+void Controller::exportHistoryToCSV()
+{
+    Utils::printMessage("Exportar Historico para CSV");
+    int walletId;
+    cout << "Digite o ID da Carteira a ser exportada: ";
+
+    while (!(cin >> walletId) || walletId <= 0)
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "ID invalido. Digite um numero inteiro positivo: ";
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    WalletDTO *wallet = walletDAO->getWalletById(walletId);
+    if (!wallet)
+    {
+        Utils::printMessage("Carteira com ID " + to_string(walletId) + " nao encontrada.");
+        return;
+    }
+
+    vector<MovementDTO *> history = movementDAO->getHistoryByWalletId(walletId);
+
+    string fileName = "historico_carteira_" + to_string(walletId) + ".csv";
+    ofstream csvFile;
+    csvFile.open(fileName);
+
+    if (!csvFile.is_open())
+    {
+        Utils::printMessage("ERRO: Nao foi possivel criar o arquivo " + fileName);
+        delete wallet;
+        for (MovementDTO *mov : history)
+        {
+            delete mov;
+        }
+        return;
+    }
+
+    csvFile << "Data,Tipo,Quantidade,CotacaoNaData,ValorTotal\n";
+
+    for (MovementDTO *mov : history)
+    {
+        OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
+        double quoteValue = quoteObj ? quoteObj->getQuote() : 0.0;
+        double totalValue = mov->getQuantity() * quoteValue;
+        string typeStr = (mov->getOperationType() == 'C') ? "Compra" : "Venda";
+
+        csvFile << mov->getDate().getIsoFormat() << ","
+                << typeStr << ","
+                << mov->getQuantity() << ","
+                << quoteValue << ","
+                << totalValue << "\n"; 
+
+        if (quoteObj)
+        {
+            delete quoteObj;
+        }
+    }
+
+    csvFile.close();
+    Utils::printMessage("Arquivo '" + fileName + "' gerado com sucesso!");
+
+    delete wallet;
+    for (MovementDTO *mov : history)
+    {
+        delete mov;
+    }
 }
