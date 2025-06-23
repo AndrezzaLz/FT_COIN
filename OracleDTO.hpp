@@ -5,14 +5,15 @@
 #include "Date.hpp"
 using namespace std;
 
-class OracleDTO {
+class OracleDTO
+{
 private:
     Date date;
     double quote;
 
 public:
     OracleDTO(Date date, double quote);
-    OracleDTO(const OracleDTO& other) = default;
+    OracleDTO(const OracleDTO &other) = default;
     virtual ~OracleDTO();
 
     Date getDate() const;

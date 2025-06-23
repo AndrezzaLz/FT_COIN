@@ -5,7 +5,8 @@
 #include "Date.hpp"
 using namespace std;
 
-class MovementDTO {
+class MovementDTO
+{
 private:
     int movementId;
     int walletId;
@@ -14,10 +15,10 @@ private:
     double quantity;
 
 public:
-    MovementDTO(int movementId, int walletId, const Date& date, char operationType, double quantity);
+    MovementDTO(int movementId, int walletId, const Date &date, char operationType, double quantity);
     virtual ~MovementDTO();
-    MovementDTO(const MovementDTO& other) = default;
-    
+    MovementDTO(const MovementDTO &other) = default;
+
     int getMovementId() const;
     int getWalletId() const;
     Date getDate() const;

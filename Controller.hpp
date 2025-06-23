@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <iostream> 
+#include <iostream>
 
 #include "AbstractWalletDAO.hpp"
 #include "AbstractMovementDAO.hpp"
@@ -13,7 +13,7 @@
 #include "MemoryDBConnection.hpp"
 #include "ServerDBConnection.hpp"
 #include "BusinessLogic.hpp"
-#include "Menu.h" 
+#include "Menu.h"
 #include "Utils.h"
 #include "SysInfo.h"
 #include "TextFromFile.h"
@@ -23,8 +23,8 @@
 #include "OracleDTO.hpp"
 #include "Date.hpp"
 
-
-class Controller final {
+class Controller final
+{
 private:
     MemoryDBConnection *memoryDBConnection;
     ServerDBConnection *serverDBConnection;
@@ -39,7 +39,7 @@ private:
     void actionReports();
     void actionHelp();
     void actionAbout();
-    
+
     // Método utilitário para lançar menus
     void launchActions(std::string title, std::vector<std::string> menuItens, std::vector<void (Controller::*)()> functions);
 
@@ -50,7 +50,7 @@ private:
     void deleteWallet();
     void listWalletsById();
     void listWalletsByHolderName();
-    
+
     // Métodos específicos para funcionalidades de Movimentação
     void registerPurchase();
     void registerSale();
@@ -74,4 +74,4 @@ public:
     void start();
 };
 
-#endif 
+#endif

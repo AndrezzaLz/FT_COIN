@@ -4,25 +4,31 @@
 #include <iostream>
 #include <algorithm>
 
-OracleMemDAO::OracleMemDAO(MemoryDBConnection* memoryDBConnection) : memoryDBConnection(memoryDBConnection) {}
+OracleMemDAO::OracleMemDAO(MemoryDBConnection *memoryDBConnection) : memoryDBConnection(memoryDBConnection) {}
 
 OracleMemDAO::~OracleMemDAO() {}
 
-OracleDTO* OracleMemDAO::getQuoteByDate(Date date) {
+OracleDTO *OracleMemDAO::getQuoteByDate(Date date)
+{
     auto it = memoryDBConnection->getOracleMap().find(date.getIsoFormat());
-    if (it != memoryDBConnection->getOracleMap().end()) {
+    if (it != memoryDBConnection->getOracleMap().end())
+    {
         return new OracleDTO(*(it->second));
     }
     return nullptr;
 }
 
-void OracleMemDAO::saveQuote(OracleDTO* quote) {
+void OracleMemDAO::saveQuote(OracleDTO *quote)
+{
     string dateStr = quote->getDate().getIsoFormat();
     auto it = memoryDBConnection->getOracleMap().find(dateStr);
-    if (it != memoryDBConnection->getOracleMap().end()) {
+    if (it != memoryDBConnection->getOracleMap().end())
+    {
         delete it->second;
         it->second = quote;
-    } else {
+    }
+    else
+    {
         memoryDBConnection->getOracleMap()[dateStr] = quote;
     }
 }

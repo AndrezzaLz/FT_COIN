@@ -5,20 +5,17 @@
 #include "MemoryDBConnection.hpp"
 
 class MovementMemDAO final : public AbstractMovementDAO
-    {
-    private:
-        MemoryDBConnection *memoryDBConnection;
-        static int lastMovementId;
+{
+private:
+    MemoryDBConnection *memoryDBConnection;
+    static int lastMovementId;
 
-    public:
-        MovementMemDAO(MemoryDBConnection *memoryDBConnection);
-        virtual ~MovementMemDAO();
-    
-        virtual void registerTransaction(MovementDTO* movement);
-        virtual vector<MovementDTO*> getHistoryByWalletId(int walletId); 
-    };
+public:
+    MovementMemDAO(MemoryDBConnection *memoryDBConnection);
+    virtual ~MovementMemDAO();
+
+    virtual void registerTransaction(MovementDTO *movement);
+    virtual vector<MovementDTO *> getHistoryByWalletId(int walletId);
+};
 
 #endif
-
-
-

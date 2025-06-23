@@ -8,42 +8,42 @@ const string SysInfo::systemName = "FT COIN 2025 C++";
 const string SysInfo::version = "1.0";
 const string SysInfo::helpFile = "help.txt";
 
-const string& SysInfo::getAuthor()
-	{
+const string &SysInfo::getAuthor()
+{
 	return author;
-	}
+}
 
-const string& SysInfo::getDate()
-	{
+const string &SysInfo::getDate()
+{
 	return date;
-	}
+}
 
-const string& SysInfo::getDepartment()
-	{
+const string &SysInfo::getDepartment()
+{
 	return department;
-	}
+}
 
-const string& SysInfo::getInstitution()
-	{
+const string &SysInfo::getInstitution()
+{
 	return institution;
-	}
+}
 
-const string& SysInfo::getSystemName()
-	{
+const string &SysInfo::getSystemName()
+{
 	return systemName;
-	}
+}
 
-const string& SysInfo::getVersion()
-	{
+const string &SysInfo::getVersion()
+{
 	return version;
-	}
+}
 
-const string& SysInfo::getHelpFile()
-	{
+const string &SysInfo::getHelpFile()
+{
 	return helpFile;
-	}
+}
 
 const string SysInfo::getFullVersion()
-	{
+{
 	return systemName + " | Ver. " + version + " (" + date + ")";
-	}
+}

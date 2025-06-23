@@ -2,8 +2,9 @@
 #define DATABASESELECTOR_HPP
 
 enum class DataBaseSelector
-	{
-	MEMORY, MARIADB
-	};
+{
+	MEMORY,
+	MARIADB
+};
 
 #endif

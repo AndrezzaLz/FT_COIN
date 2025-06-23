@@ -5,14 +5,14 @@
 #include <string>
 #include "OracleDTO.hpp"
 
-class AbstractOracleDAO 
-    {
-    public:
-        AbstractOracleDAO();
-        virtual ~AbstractOracleDAO();
+class AbstractOracleDAO
+{
+public:
+    AbstractOracleDAO();
+    virtual ~AbstractOracleDAO();
 
-        virtual OracleDTO* getQuoteByDate(Date date) = 0;
-        virtual void saveQuote(OracleDTO *quote) = 0;
-    };
+    virtual OracleDTO *getQuoteByDate(Date date) = 0;
+    virtual void saveQuote(OracleDTO *quote) = 0;
+};
 
-#endif 
+#endif

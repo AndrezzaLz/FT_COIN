@@ -6,20 +6,21 @@
 
 using namespace std;
 
-class WalletDTO {
+class WalletDTO
+{
 private:
     int walletId;
     string holderName;
     string exchangeName;
 
 public:
-   WalletDTO(int walletId, const string& holderName, const string& exchangeName);
-   virtual ~WalletDTO();
+    WalletDTO(int walletId, const string &holderName, const string &exchangeName);
+    virtual ~WalletDTO();
 
-   int getWalletId() const;
-   string getHolderName() const;
-   string getExchangeName() const;
-   void setWalletId(int walletId);
+    int getWalletId() const;
+    string getHolderName() const;
+    string getExchangeName() const;
+    void setWalletId(int walletId);
 };
 
 #endif

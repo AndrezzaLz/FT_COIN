@@ -2,7 +2,7 @@
 #include <string>
 #include <exception>
 #include <memory>
-#include <limits> 
+#include <limits>
 #include "Controller.hpp"
 #include "DataBaseSelector.hpp"
 #include "SysInfo.h"
@@ -21,32 +21,39 @@ int main(int argc, char *argv[])
     std::cout << "Selecione o modo de persistencia:" << std::endl;
     std::cout << "1. Banco de Dados em Memoria (rapido, dados perdidos ao sair)" << std::endl;
     std::cout << "2. Banco de Dados MariaDB (requer servidor, dados permanentes)" << std::endl;
-    
-    while (true) {
+
+    while (true)
+    {
         std::cout << "Sua opcao: ";
         std::cin >> choice;
 
-        if (std::cin.good() && (choice == 1 || choice == 2)) {
-            break; 
-        } else {
+        if (std::cin.good() && (choice == 1 || choice == 2))
+        {
+            break;
+        }
+        else
+        {
             std::cout << "Opcao invalida. Por favor, digite 1 ou 2." << std::endl;
-            std::cin.clear(); 
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
     }
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    if (choice == 1) {
+    if (choice == 1)
+    {
         selector = DataBaseSelector::MEMORY;
         Utils::printMessage("Modo de persistencia em MEMORIA selecionado.");
-    } else {
+    }
+    else
+    {
         selector = DataBaseSelector::MARIADB;
     }
 
     try
     {
         std::unique_ptr<Controller> appController(new Controller(selector));
-        
+
         appController->start();
     }
     catch (const std::exception &e)

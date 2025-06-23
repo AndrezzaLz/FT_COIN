@@ -30,16 +30,16 @@
 using namespace std;
 
 class TextFromFile final
-	{
-	private:
-		string fileName;
-		string fileContent;
+{
+private:
+	string fileName;
+	string fileContent;
 
-	public:
-		TextFromFile(string fileName);
-		virtual ~TextFromFile();
-		string& getFileContent();
-		string& getFileName();
-	};
+public:
+	TextFromFile(string fileName);
+	virtual ~TextFromFile();
+	string &getFileContent();
+	string &getFileName();
+};
 
 #endif /* TEXTFROMFILE_H_ */

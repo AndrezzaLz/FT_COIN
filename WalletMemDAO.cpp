@@ -9,56 +9,59 @@ WalletMemDAO::WalletMemDAO(MemoryDBConnection *memoryDBConnection)
 }
 
 WalletMemDAO::~WalletMemDAO()
-    {
-    }
-
-vector<WalletDTO*> WalletMemDAO::getAllWallets()
 {
-    vector<WalletDTO*> wallets_copy; 
-    for (WalletDTO* walletPtr : memoryDBConnection->getWalletList()) {
-        wallets_copy.push_back(new WalletDTO(*walletPtr));
-    }
-    return wallets_copy; 
 }
 
-WalletDTO* WalletMemDAO::getWalletById(int walletId)
+vector<WalletDTO *> WalletMemDAO::getAllWallets()
 {
-    vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
-    
-    for (WalletDTO* walletPtr : wallets) {
-        if (walletPtr->getWalletId() == walletId) {
+    vector<WalletDTO *> wallets_copy;
+    for (WalletDTO *walletPtr : memoryDBConnection->getWalletList())
+    {
+        wallets_copy.push_back(new WalletDTO(*walletPtr));
+    }
+    return wallets_copy;
+}
+
+WalletDTO *WalletMemDAO::getWalletById(int walletId)
+{
+    vector<WalletDTO *> &wallets = memoryDBConnection->getWalletList();
+
+    for (WalletDTO *walletPtr : wallets)
+    {
+        if (walletPtr->getWalletId() == walletId)
+        {
             return new WalletDTO(*walletPtr);
         }
     }
 
-    return nullptr; 
+    return nullptr;
 }
 void WalletMemDAO::addWallet(WalletDTO *wallet)
-    {
+{
     wallet->setWalletId(++lastWalletId);
     (memoryDBConnection->getWalletList()).push_back(wallet);
-    }
+}
 
 void WalletMemDAO::updateWallet(WalletDTO *wallet)
-    {
+{
     deleteWallet(wallet->getWalletId());
     addWallet(wallet);
-    }
+}
 
 void WalletMemDAO::deleteWallet(int walletId)
-    {
-    vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
-    vector<WalletDTO*>::iterator walletsIterator = wallets.begin();
+{
+    vector<WalletDTO *> &wallets = memoryDBConnection->getWalletList();
+    vector<WalletDTO *>::iterator walletsIterator = wallets.begin();
     bool found = false;
 
     while ((!found) && (walletsIterator != wallets.end()))
-        {
+    {
         if ((*walletsIterator)->getWalletId() == walletId)
-            {
-                found = true;
-                delete *walletsIterator;
-                wallets.erase(walletsIterator);
-            }
-        walletsIterator++;
+        {
+            found = true;
+            delete *walletsIterator;
+            wallets.erase(walletsIterator);
         }
+        walletsIterator++;
     }
+}

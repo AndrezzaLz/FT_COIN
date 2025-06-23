@@ -6,19 +6,19 @@
 #include "ServerDBConnection.hpp"
 
 class OracleDBDAO final : public AbstractOracleDAO
-    {
-    private:
-        static const string SQL_saveQuote;
-        static const string SQL_getQuote;
+{
+private:
+    static const string SQL_saveQuote;
+    static const string SQL_getQuote;
 
-        ServerDBConnection *serverDBConnection;
+    ServerDBConnection *serverDBConnection;
 
-    public:
-        OracleDBDAO(ServerDBConnection *serverDBConnection);
-        virtual ~OracleDBDAO();
+public:
+    OracleDBDAO(ServerDBConnection *serverDBConnection);
+    virtual ~OracleDBDAO();
 
-        virtual void saveQuote(OracleDTO *quote);
-        virtual OracleDTO* getQuoteByDate(Date date);
+    virtual void saveQuote(OracleDTO *quote);
+    virtual OracleDTO *getQuoteByDate(Date date);
 };
 
 #endif

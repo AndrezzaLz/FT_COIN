@@ -4,13 +4,14 @@
 #include <vector>
 #include "MovementDTO.hpp"
 
-class AbstractMovementDAO {
+class AbstractMovementDAO
+{
 public:
     AbstractMovementDAO();
     virtual ~AbstractMovementDAO();
 
-    virtual void registerTransaction(MovementDTO* movement) = 0;
-    virtual vector<MovementDTO*> getHistoryByWalletId(int walletId) = 0;
+    virtual void registerTransaction(MovementDTO *movement) = 0;
+    virtual vector<MovementDTO *> getHistoryByWalletId(int walletId) = 0;
 };
 
 #endif

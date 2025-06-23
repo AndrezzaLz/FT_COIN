@@ -5,16 +5,16 @@
 #include "MemoryDBConnection.hpp"
 
 class OracleMemDAO final : public AbstractOracleDAO
-    {
-    private: 
-        MemoryDBConnection *memoryDBConnection;
+{
+private:
+    MemoryDBConnection *memoryDBConnection;
 
-    public:
-        OracleMemDAO(MemoryDBConnection *memoryDBConnection);
-        virtual ~OracleMemDAO();
+public:
+    OracleMemDAO(MemoryDBConnection *memoryDBConnection);
+    virtual ~OracleMemDAO();
 
-        virtual OracleDTO* getQuoteByDate(Date date);
-        virtual void saveQuote(OracleDTO *quote);
-    };
+    virtual OracleDTO *getQuoteByDate(Date date);
+    virtual void saveQuote(OracleDTO *quote);
+};
 
 #endif

@@ -709,7 +709,7 @@ void Controller::exportHistoryToCSV()
                 << typeStr << ","
                 << mov->getQuantity() << ","
                 << quoteValue << ","
-                << totalValue << "\n"; 
+                << totalValue << "\n";
 
         if (quoteObj)
         {
