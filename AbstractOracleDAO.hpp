@@ -13,6 +13,7 @@ public:
 
     virtual OracleDTO *getQuoteByDate(Date date) = 0;
     virtual void saveQuote(OracleDTO *quote) = 0;
+    virtual void clearAll() = 0;
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "Controller.hpp"
+#include "Utils.h"
 #include <cctype>
 #include <iomanip>
 #include <limits>
@@ -53,6 +54,8 @@ Controller::Controller(DataBaseSelector dataBaseSelector)
             movementDAO = new MovementDBDAO(serverDBConnection);
             oracleDAO = new OracleDBDAO(serverDBConnection);
             businessLogic = new BusinessLogic(walletDAO, movementDAO, oracleDAO);
+        
+            populateDemoData();
         }
         catch (const exception &e)
         {
@@ -100,10 +103,13 @@ Controller::~Controller()
 
 void Controller::start()
 {
-    const string ANSI_RED = "\033[0;31m";
-    const string ANSI_RESET = "\033[0m";
-
-    vector<string> mainMenuItems = {"Carteira", "Movimentacao", "Relatorios", "Ajuda", ANSI_RED + "Sair do Programa" + ANSI_RESET};
+    vector<string> mainMenuItems;
+    mainMenuItems.push_back("Carteira");
+    mainMenuItems.push_back("Movimentacao");
+    mainMenuItems.push_back("Relatorios");
+    mainMenuItems.push_back("Ajuda");
+    mainMenuItems.push_back(string(Utils::ANSI_RED) + "Sair do Programa" + Utils::ANSI_RESET);
+    
     vector<void (Controller::*)()> functions = {
         &Controller::actionWallet,
         &Controller::actionMovement,
@@ -205,7 +211,7 @@ void Controller::newWallet()
             Utils::printMessage("Nome do titular ou corretora nao podem ser vazios. Operacao cancelada.");
             return;
         }
-        WalletDTO *newWallet = new WalletDTO(0, holderName, exchangeName);
+        WalletDTO *newWallet = new WalletDTO(Utils::AUTO_GENERATED_ID, holderName, exchangeName);
         walletDAO->addWallet(newWallet);
         Utils::printMessage("Carteira adicionada com sucesso!");
     }
@@ -358,7 +364,7 @@ void Controller::listWalletsById()
     sort(wallets.begin(), wallets.end(), [](WalletDTO *a, WalletDTO *b)
          { return a->getWalletId() < b->getWalletId(); });
 
-    string decorator = Utils::replicate("=", 80);
+    string decorator = Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_NORMAL);
     cout << decorator << endl;
     cout << left << setw(10) << "ID" << setw(30) << "Titular" << setw(30) << "Corretora" << endl;
     cout << decorator << endl;
@@ -386,7 +392,7 @@ void Controller::listWalletsByHolderName()
     sort(wallets.begin(), wallets.end(), [](WalletDTO *a, WalletDTO *b)
          { return a->getHolderName() < b->getHolderName(); });
 
-    string decorator = Utils::replicate("=", 80);
+    string decorator = Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_NORMAL);
     cout << decorator << endl;
     cout << left << setw(10) << "ID" << setw(30) << "Titular" << setw(30) << "Corretora" << endl;
     cout << decorator << endl;
@@ -442,7 +448,7 @@ void Controller::registerPurchase()
 
     try
     {
-        MovementDTO *newMovement = new MovementDTO(0, walletId, opDate, 'C', quantity);
+        MovementDTO *newMovement = new MovementDTO(Utils::AUTO_GENERATED_ID, walletId, opDate, OperationType::BUY, quantity);
         movementDAO->registerTransaction(newMovement);
         Utils::printMessage("Compra registrada com sucesso na carteira " + to_string(walletId) + "!");
     }
@@ -498,7 +504,7 @@ void Controller::registerSale()
 
     try
     {
-        MovementDTO *newMovement = new MovementDTO(0, walletId, opDate, 'V', quantity);
+        MovementDTO *newMovement = new MovementDTO(Utils::AUTO_GENERATED_ID, walletId, opDate, OperationType::SELL, quantity);
         movementDAO->registerTransaction(newMovement);
         Utils::printMessage("Venda registrada com sucesso na carteira " + to_string(walletId) + "!");
     }
@@ -534,11 +540,11 @@ void Controller::showWalletBalance()
 
     double saldo = businessLogic->calculateWalletBalance(walletId);
 
-    cout << Utils::replicate("=", 80) << endl;
+    cout << Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_NORMAL) << endl;
     cout << "Saldo da Carteira " << targetWallet->getHolderName()
          << " (ID: " << targetWallet->getWalletId() << "): R$ "
          << fixed << setprecision(2) << saldo << endl;
-    cout << Utils::replicate("=", 80) << endl;
+    cout << Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_NORMAL) << endl;
 
     delete targetWallet;
 }
@@ -580,82 +586,167 @@ void Controller::showGainsLosses()
         return;
     }
 
-    cout << Utils::replicate("=", 100) << endl;
+    cout << Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_WIDE) << endl;
     cout << left << setw(10) << "ID" << setw(30) << "Titular" << setw(30) << "Corretora" << setw(20) << "Ganho/Perda (R$)" << endl;
-    cout << Utils::replicate("=", 100) << endl;
+    cout << Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_WIDE) << endl;
 
     for (WalletDTO *wallet : allWallets)
     {
         double gainLoss = businessLogic->calculateGainLoss(wallet->getWalletId());
 
-        const string ANSI_RED = "\033[0;31m";
-        const string ANSI_GREEN = "\033[1;32m";
-        const string ANSI_RESET = "\033[0m";
-
-        string color = (gainLoss >= 0) ? ANSI_GREEN : ANSI_RED;
+        string color = (gainLoss >= 0) ? Utils::ANSI_GREEN : Utils::ANSI_RED;
 
         cout << left << setw(10) << wallet->getWalletId()
              << setw(30) << wallet->getHolderName()
              << setw(30) << wallet->getExchangeName()
-             << color << fixed << setprecision(2) << setw(20) << gainLoss << ANSI_RESET << endl;
+             << color << fixed << setprecision(2) << setw(20) << gainLoss << Utils::ANSI_RESET << endl;
 
         delete wallet;
     }
 
-    cout << Utils::replicate("=", 100) << endl;
+    cout << Utils::replicate(Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_WIDE) << endl;
 }
 
 void Controller::showHelpText()
 {
     Utils::printMessage("Texto de Ajuda do FT_Coin");
     unique_ptr<TextFromFile> textFromFile(new TextFromFile("help.txt"));
-    Utils::printFramedMessage(textFromFile->getFileContent(), "-", 100);
+    Utils::printFramedMessage(textFromFile->getFileContent(), Utils::DECORATOR_DASH, Utils::TABLE_WIDTH_WIDE);
 }
 
 void Controller::showCredits()
 {
     string text = "";
     text += SysInfo::getFullVersion() + "\n";
-    text += "Desenvolvido por: Andrezza,Bianca, Henrique, Sidinei, Yasmin\n";
+    text += "Desenvolvido por: Andrezza, Bianca, Henrique, Sidinei, Yasmin\n";
     text += SysInfo::getInstitution() + "\n";
     text += SysInfo::getDepartment() + "\n";
     text += "Copyright " + SysInfo::getAuthor() + " " + SysInfo::getDate() + "\n";
     Utils::printMessage(SysInfo::getVersion() + " | Creditos");
-    Utils::printFramedMessage(text, "=", 100);
+    Utils::printFramedMessage(text, Utils::DECORATOR_EQUALS, Utils::TABLE_WIDTH_WIDE);
 }
 
 void Controller::populateDemoData()
 {
-    Utils::printMessage("Populando dados de demonstracao (apenas para DB em memoria)...");
 
-    WalletDTO *w1 = new WalletDTO(0, "Maria Silva", "Binance");
-    walletDAO->addWallet(w1);
-    WalletDTO *w2 = new WalletDTO(0, "João Pereira", "Coinbase");
-    walletDAO->addWallet(w2);
-    WalletDTO *w3 = new WalletDTO(0, "Ana Souza", "Mercado Bitcoin");
-    walletDAO->addWallet(w3);
+#ifdef USE_MARIADB
+    Utils::printMessage("Populando dados de demonstracao (MariaDB)... ");
 
-    int mariaId = walletDAO->getAllWallets().at(0)->getWalletId();
-    int joaoId = walletDAO->getAllWallets().at(1)->getWalletId();
-    int anaId = walletDAO->getAllWallets().at(2)->getWalletId();
+    try
+    {
+        if(serverDBConnection) 
+        {
+            serverDBConnection->getConnection()->setAutoCommit(false);
+        }
 
-    oracleDAO->saveQuote(new OracleDTO(Date(10, 5, 2024), 10000.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(11, 5, 2024), 10500.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(12, 5, 2024), 9800.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(13, 5, 2024), 11000.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(14, 5, 2024), 10200.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(15, 5, 2024), 10800.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(16, 5, 2024), 11500.00));
-    oracleDAO->saveQuote(new OracleDTO(Date(17, 5, 2024), 9500.00));
+        movementDAO->clearAll();
+        walletDAO->clearAll();
+        oracleDAO->clearAll();
 
-    movementDAO->registerTransaction(new MovementDTO(0, mariaId, Date(10, 5, 2024), 'C', 1.5));
-    movementDAO->registerTransaction(new MovementDTO(0, mariaId, Date(13, 5, 2024), 'V', 0.5));
-    movementDAO->registerTransaction(new MovementDTO(0, joaoId, Date(11, 5, 2024), 'C', 2.0));
-    movementDAO->registerTransaction(new MovementDTO(0, joaoId, Date(17, 5, 2024), 'V', 1.0));
-    movementDAO->registerTransaction(new MovementDTO(0, anaId, Date(12, 5, 2024), 'C', 0.8));
-    movementDAO->registerTransaction(new MovementDTO(0, anaId, Date(16, 5, 2024), 'V', 0.3));
+        WalletDTO *w1 = new WalletDTO(Utils::AUTO_GENERATED_ID, "Maria Silva", "Binance");
+        walletDAO->addWallet(w1);
+        WalletDTO *w2 = new WalletDTO(Utils::AUTO_GENERATED_ID, "João Pereira", "Coinbase");
+        walletDAO->addWallet(w2);
+        WalletDTO *w3 = new WalletDTO(Utils::AUTO_GENERATED_ID, "Ana Souza", "Mercado Bitcoin");
+        walletDAO->addWallet(w3);
 
-    Utils::printMessage("Dados de demonstracao populados com sucesso!");
+        int mariaId = walletDAO->getAllWallets().at(0)->getWalletId();
+        int joaoId = walletDAO->getAllWallets().at(1)->getWalletId();
+        int anaId = walletDAO->getAllWallets().at(2)->getWalletId();
+
+        oracleDAO->saveQuote(new OracleDTO(Date(10, 5, 2024), 9500.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(11, 5, 2024), 9000.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(12, 5, 2024), 9800.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(13, 5, 2024), 9100.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(14, 5, 2024), 8700.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(15, 5, 2024), 9200.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(16, 5, 2024), 9900.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(17, 5, 2024), 9500.00));
+
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, mariaId, Date(10, 5, 2024), OperationType::BUY, 1.5));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, mariaId, Date(13, 5, 2024), OperationType::SELL, 0.5));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, joaoId, Date(11, 5, 2024), OperationType::BUY, 2.0));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, joaoId, Date(17, 5, 2024), OperationType::SELL, 1.0));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, anaId, Date(12, 5, 2024), OperationType::BUY, 0.8));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, anaId, Date(16, 5, 2024), OperationType::SELL, 0.3));
+
+        if (serverDBConnection) 
+        {
+            serverDBConnection->getConnection()->commit();
+            serverDBConnection->getConnection()->setAutoCommit(true);
+        }
+        
+        Utils::printMessage("Dados de demonstracao populados com sucesso (MariaDB)!");
+    } 
+    catch (const sql::SQLException &e) 
+    { 
+        Utils::printMessage("ERRO ao popular dados de demonstracao no MariaDB: " + string(e.what()));
+        if (serverDBConnection) 
+        {
+            try 
+            {
+                serverDBConnection->getConnection()->rollback();
+                serverDBConnection->getConnection()->setAutoCommit(true);
+            } 
+            catch (const sql::SQLException &rb_e) 
+            {
+                cerr << "Erro no rollback durante populacao: " << rb_e.what() << endl;
+            }
+        }
+    } 
+    catch (const exception &e) 
+    {
+        Utils::printMessage("ERRO inesperado ao popular dados de demonstracao: " + string(e.what()));
+        if (serverDBConnection) 
+        {
+            try 
+            {
+                serverDBConnection->getConnection()->rollback();
+                serverDBConnection->getConnection()->setAutoCommit(true);
+            } 
+            catch (const sql::SQLException &rb_e) 
+            {
+                cerr << "Erro no rollback durante populacao: " << rb_e.what() << endl;
+            }
+        }
+    }
+#else
+
+        Utils::printMessage("Populando dados de demonstracao (MEMORIA)...");
+
+        movementDAO->clearAll();
+        walletDAO->clearAll();
+        oracleDAO->clearAll();
+
+        WalletDTO *w1 = new WalletDTO(Utils::AUTO_GENERATED_ID, "Maria Silva", "Binance");
+        walletDAO->addWallet(w1);
+        WalletDTO *w2 = new WalletDTO(Utils::AUTO_GENERATED_ID, "João Pereira", "Coinbase");
+        walletDAO->addWallet(w2);
+        WalletDTO *w3 = new WalletDTO(Utils::AUTO_GENERATED_ID, "Ana Souza", "Mercado Bitcoin");
+        walletDAO->addWallet(w3);
+
+        int mariaId = walletDAO->getAllWallets().at(0)->getWalletId();
+        int joaoId = walletDAO->getAllWallets().at(1)->getWalletId();
+        int anaId = walletDAO->getAllWallets().at(2)->getWalletId();
+
+        oracleDAO->saveQuote(new OracleDTO(Date(10, 5, 2024), 9500.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(11, 5, 2024), 9000.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(12, 5, 2024), 9800.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(13, 5, 2024), 9100.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(14, 5, 2024), 8700.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(15, 5, 2024), 9200.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(16, 5, 2024), 9900.00));
+        oracleDAO->saveQuote(new OracleDTO(Date(17, 5, 2024), 9500.00));
+
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, mariaId, Date(10, 5, 2024), OperationType::BUY, 1.5));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, mariaId, Date(13, 5, 2024), OperationType::SELL, 0.5));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, joaoId, Date(11, 5, 2024), OperationType::BUY, 2.0));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, joaoId, Date(17, 5, 2024), OperationType::SELL, 1.0));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, anaId, Date(12, 5, 2024), OperationType::BUY, 0.8));
+        movementDAO->registerTransaction(new MovementDTO(Utils::AUTO_GENERATED_ID, anaId, Date(16, 5, 2024), OperationType::SELL, 0.3));
+
+        Utils::printMessage("Dados de demonstracao populados com sucesso (MEMORIA)!");
+#endif
 }
 
 void Controller::exportHistoryToCSV()
@@ -703,7 +794,7 @@ void Controller::exportHistoryToCSV()
         OracleDTO *quoteObj = oracleDAO->getQuoteByDate(mov->getDate());
         double quoteValue = quoteObj ? quoteObj->getQuote() : 0.0;
         double totalValue = mov->getQuantity() * quoteValue;
-        string typeStr = (mov->getOperationType() == 'C') ? "Compra" : "Venda";
+        string typeStr = (mov->getOperationType() == OperationType::BUY) ? "Compra" : "Venda";
 
         csvFile << mov->getDate().getIsoFormat() << ","
                 << typeStr << ","

@@ -16,6 +16,7 @@ public:
 
     virtual void registerTransaction(MovementDTO *movement);
     virtual vector<MovementDTO *> getHistoryByWalletId(int walletId);
+    virtual void clearAll();
 };
 
 #endif

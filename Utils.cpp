@@ -50,3 +50,11 @@ string Utils::replicate(string text, int times)
 	}
 	return (buffer);
 }
+
+const string Utils::DECORATOR_EQUALS = "="; 
+const string Utils::DECORATOR_DASH = "-";
+
+const char* Utils::ANSI_RED = "\033[0;31m";
+const char* Utils::ANSI_GREEN = "\033[1;32m";
+const char* Utils::ANSI_RESET = "\033[0m";
+

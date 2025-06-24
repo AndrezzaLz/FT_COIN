@@ -21,6 +21,8 @@ public:
     string getHolderName() const;
     string getExchangeName() const;
     void setWalletId(int walletId);
+    void setHolderName(const string& holderName);
+    void setExchangeName(const string& exchangeName); 
 };
 
 #endif

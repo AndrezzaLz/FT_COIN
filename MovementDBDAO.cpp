@@ -21,7 +21,7 @@ void MovementDBDAO::registerTransaction(MovementDTO *movement)
         unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_registerTransaction));
         stmnt->setInt(1, movement->getWalletId());
         stmnt->setString(2, movement->getDate().getIsoFormat());
-        stmnt->setString(3, string(1, movement->getOperationType()));
+        stmnt->setString(3, string(1, static_cast<char>(movement->getOperationType())));
         stmnt->setDouble(4, movement->getQuantity());
         stmnt->executeQuery();
     }
@@ -31,20 +31,45 @@ void MovementDBDAO::registerTransaction(MovementDTO *movement)
     }
 }
 
-vector<MovementDTO *> MovementMemDAO::getHistoryByWalletId(int walletId)
+vector<MovementDTO*> MovementDBDAO::getHistoryByWalletId(int walletId)
 {
-    vector<MovementDTO *> history;
-    for (MovementDTO *movementPtr : memoryDBConnection->getMovementList())
+    vector<MovementDTO*> historyDB;
+    try
     {
-        if (movementPtr->getWalletId() == walletId)
+        unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_getHistory));
+        stmnt->setInt(1, walletId);
+        sql::ResultSet *res = stmnt->executeQuery();
+
+        while (res->next())
         {
-            history.push_back(new MovementDTO(*movementPtr));
+            int movementId = res->getInt(1);
+            int WalletId = res->getInt(2);
+            string dateStr(res->getString(3));
+            Date date(dateStr);
+            OperationType operationType = static_cast<OperationType>(res->getString(4).at(0));
+            double quantity = res->getDouble(5);
+
+            MovementDTO *buffer = new MovementDTO(movementId, walletId, date, operationType, quantity);
+            historyDB.push_back(buffer);
         }
     }
+    catch(sql::SQLException &e)
+    {
+        cerr << "Erro ao buscar historico: " << e.what() << endl;
+    }
+    return historyDB;
+}
 
-    sort(history.begin(), history.end(), [](MovementDTO *a, MovementDTO *b)
-         { return a->getDate() < b->getDate(); });
-
-    return history;
+void MovementDBDAO::clearAll() {
+    try 
+    {
+        unique_ptr<sql::Statement> stmnt(serverDBConnection->getConnection()->createStatement());
+        stmnt->executeQuery("delete from MOVIMENTACAO"); 
+    } 
+    catch(sql::SQLException &e) 
+    {
+        cerr << "Erro ao limpar tabela MOVIMENTACAO: " << e.what() << endl;
+    } 
+}
 
 #endif

@@ -1,7 +1,8 @@
 #include "MovementDTO.hpp"
+#include "Utils.h"
 #include <stdexcept>
 
-MovementDTO::MovementDTO(int movementId, int walletId, const Date &date, char operationType, double quantity) : movementId(movementId), walletId(walletId), date(date), operationType(operationType), quantity(quantity)
+MovementDTO::MovementDTO(int movementId, int walletId, const Date &date, OperationType operationType, double quantity) : movementId(movementId), walletId(walletId), date(date), operationType(operationType), quantity(quantity)
 {
     if (quantity < 0)
     {
@@ -28,7 +29,7 @@ Date MovementDTO::getDate() const
     return date;
 }
 
-char MovementDTO::getOperationType() const
+OperationType MovementDTO::getOperationType() const
 {
     return operationType;
 }
@@ -40,7 +41,7 @@ double MovementDTO::getQuantity() const
 
 void MovementDTO::setMovementId(int movementId)
 {
-    if (this->movementId == 0)
+    if (this->movementId == Utils::AUTO_GENERATED_ID)
     {
         this->movementId = movementId;
     }

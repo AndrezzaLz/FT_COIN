@@ -5,24 +5,29 @@
 #include "Date.hpp"
 using namespace std;
 
+enum class OperationType {
+    BUY = 'C', // 'C' for Buy (Compra - PTBR)
+    SELL = 'V' // 'V' for SELL (Venda - PTBR)
+};
+
 class MovementDTO
 {
 private:
     int movementId;
     int walletId;
     Date date;
-    char operationType; // 'C' for Compra, 'V' for Venda
+    OperationType operationType; // 'C' for Compra, 'V' for Venda
     double quantity;
 
 public:
-    MovementDTO(int movementId, int walletId, const Date &date, char operationType, double quantity);
+    MovementDTO(int movementId, int walletId, const Date &date, OperationType operationType, double quantity);
     virtual ~MovementDTO();
     MovementDTO(const MovementDTO &other) = default;
 
     int getMovementId() const;
     int getWalletId() const;
     Date getDate() const;
-    char getOperationType() const;
+    OperationType getOperationType() const;
     double getQuantity() const;
     void setMovementId(int movementId);
 };

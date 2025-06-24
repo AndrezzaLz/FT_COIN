@@ -25,6 +25,7 @@ public:
     virtual void addWallet(WalletDTO *wallet);
     virtual void updateWallet(WalletDTO *wallet);
     virtual void deleteWallet(int walletId);
+    virtual void clearAll();
 };
 
 #endif
