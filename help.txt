@@ -25,12 +25,9 @@ Funcionalidades Principais:
     - Apresentar o histórico completo de movimentações de uma carteira.
     - Calcular e mostrar o ganho ou perda total de cada carteira, utilizando 
       as cotações históricas do oráculo.
+    - Gerar relatório em formato de CSV.
 
-4.  Oráculo:
-    - O sistema consulta um banco de dados de cotações para realizar os cálculos. 
-      Certifique-se de que as cotações para as datas das suas operações estejam disponíveis.
-
-5.  Sair:
+4.  Sair:
     - Encerra o programa de forma segura, fechando todas as conexões.
 
 Dicas de Uso:
