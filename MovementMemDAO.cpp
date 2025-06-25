@@ -35,11 +35,12 @@ vector<MovementDTO *> MovementMemDAO::getHistoryByWalletId(int walletId)
     return history;
 }
 
-void MovementMemDAO::clearAll() {
-    for (MovementDTO* buffer : memoryDBConnection->getMovementList()) 
+void MovementMemDAO::clearAll()
+{
+    for (MovementDTO *buffer : memoryDBConnection->getMovementList())
     {
         delete buffer;
     }
     memoryDBConnection->getMovementList().clear();
-    lastMovementId = 0; 
-}    
+    lastMovementId = 0;
+}

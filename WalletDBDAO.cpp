@@ -124,7 +124,7 @@ void WalletDBDAO::deleteWallet(int walletId)
             serverDBConnection->getConnection()->rollback();
             serverDBConnection->getConnection()->setAutoCommit(true);
         }
-        catch(const std::exception& rb_e)
+        catch (const std::exception &rb_e)
         {
             cerr << "Erro no rollback: " << rb_e.what() << endl;
         }
@@ -132,13 +132,14 @@ void WalletDBDAO::deleteWallet(int walletId)
     }
 }
 
-void WalletDBDAO::clearAll() {
-    try 
+void WalletDBDAO::clearAll()
+{
+    try
     {
         unique_ptr<sql::Statement> stmnt(serverDBConnection->getConnection()->createStatement());
         stmnt->executeQuery("delete from CARTEIRA");
-    } 
-    catch(sql::SQLException &e) 
+    }
+    catch (sql::SQLException &e)
     {
         cerr << "Erro ao limpar tabela CARTEIRA: " << e.what() << endl;
     }

@@ -31,9 +31,9 @@ void MovementDBDAO::registerTransaction(MovementDTO *movement)
     }
 }
 
-vector<MovementDTO*> MovementDBDAO::getHistoryByWalletId(int walletId)
+vector<MovementDTO *> MovementDBDAO::getHistoryByWalletId(int walletId)
 {
-    vector<MovementDTO*> historyDB;
+    vector<MovementDTO *> historyDB;
     try
     {
         unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_getHistory));
@@ -53,23 +53,24 @@ vector<MovementDTO*> MovementDBDAO::getHistoryByWalletId(int walletId)
             historyDB.push_back(buffer);
         }
     }
-    catch(sql::SQLException &e)
+    catch (sql::SQLException &e)
     {
         cerr << "Erro ao buscar historico: " << e.what() << endl;
     }
     return historyDB;
 }
 
-void MovementDBDAO::clearAll() {
-    try 
+void MovementDBDAO::clearAll()
+{
+    try
     {
         unique_ptr<sql::Statement> stmnt(serverDBConnection->getConnection()->createStatement());
-        stmnt->executeQuery("delete from MOVIMENTACAO"); 
-    } 
-    catch(sql::SQLException &e) 
+        stmnt->executeQuery("delete from MOVIMENTACAO");
+    }
+    catch (sql::SQLException &e)
     {
         cerr << "Erro ao limpar tabela MOVIMENTACAO: " << e.what() << endl;
-    } 
+    }
 }
 
 #endif

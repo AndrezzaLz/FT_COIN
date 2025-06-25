@@ -45,12 +45,12 @@ void WalletDTO::setWalletId(int walletId)
     }
 }
 
-void WalletDTO::setHolderName(const string& holderName) 
+void WalletDTO::setHolderName(const string &holderName)
 {
     this->holderName = holderName;
 }
 
-void WalletDTO::setExchangeName(const string& exchangeName)
+void WalletDTO::setExchangeName(const string &exchangeName)
 {
     this->exchangeName = exchangeName;
 }

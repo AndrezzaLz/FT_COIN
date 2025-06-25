@@ -18,31 +18,30 @@ Date::Date()
 
 Date::Date(string isoFormat)
 {
-	try 
+	try
 	{
-        if (isoFormat.length() < 10 || isoFormat.at(4) != '-' || isoFormat.at(7) != '-') 
+		if (isoFormat.length() < 10 || isoFormat.at(4) != '-' || isoFormat.at(7) != '-')
 		{
-            throw invalid_argument("Formato ISO de data invalido: esperado YYYY-MM-DD.");
-        }
+			throw invalid_argument("Formato ISO de data invalido: esperado YYYY-MM-DD.");
+		}
 
 		day = stoi(isoFormat.substr(8, 2));
 		month = stoi(isoFormat.substr(5, 2));
 		year = stoi(isoFormat.substr(0, 4));
 
-		if (month < 1 || month > 12 || day < 1 || day > 31) 
-		{ 
+		if (month < 1 || month > 12 || day < 1 || day > 31)
+		{
 			throw invalid_argument("Data fora do intervalo valido (ISO).");
 		}
-	} 
-	catch (const out_of_range& oor) 
+	}
+	catch (const out_of_range &oor)
 	{
-        throw invalid_argument("Valor numerico fora do range no formato ISO de data.");
-    } 
-	catch (const invalid_argument& ia) 
+		throw invalid_argument("Valor numerico fora do range no formato ISO de data.");
+	}
+	catch (const invalid_argument &ia)
 	{
-        throw invalid_argument("Erro ao converter data ISO: " + string(ia.what()));
-    }
-
+		throw invalid_argument("Erro ao converter data ISO: " + string(ia.what()));
+	}
 }
 
 Date::Date(int day, int month, int year) : day(day), month(month), year(year)
@@ -74,7 +73,7 @@ string Date::getIsoFormat()
 	ss << setfill('0') << setw(4) << year << "-";
 	ss << setfill('0') << setw(2) << month << "-";
 	ss << setfill('0') << setw(2) << day;
-	return ss.str(); 
+	return ss.str();
 }
 
 bool Date::operator==(const Date &other) const

@@ -57,14 +57,14 @@ OracleDTO *OracleDBDAO::getQuoteByDate(Date date)
     return (buffer);
 }
 
-void OracleDBDAO::clearAll() 
+void OracleDBDAO::clearAll()
 {
-    try 
+    try
     {
         unique_ptr<sql::Statement> stmnt(serverDBConnection->getConnection()->createStatement());
-        stmnt->executeQuery("delete from ORACULO"); 
-    } 
-    catch(sql::SQLException &e) 
+        stmnt->executeQuery("delete from ORACULO");
+    }
+    catch (sql::SQLException &e)
     {
         cerr << "Erro ao limpar tabela ORACULO: " << e.what() << endl;
     }

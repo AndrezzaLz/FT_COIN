@@ -5,7 +5,8 @@
 #include "Date.hpp"
 using namespace std;
 
-enum class OperationType {
+enum class OperationType
+{
     BUY = 'C', // 'C' for Buy (Compra - PTBR)
     SELL = 'V' // 'V' for SELL (Venda - PTBR)
 };

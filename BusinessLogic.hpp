@@ -12,14 +12,15 @@
 #include <vector>
 #include <string>
 
-class BusinessLogic {
+class BusinessLogic
+{
 private:
-    AbstractWalletDAO* walletDAO;
-    AbstractMovementDAO* movementDAO;
-    AbstractOracleDAO* oracleDAO;
+    AbstractWalletDAO *walletDAO;
+    AbstractMovementDAO *movementDAO;
+    AbstractOracleDAO *oracleDAO;
 
 public:
-    BusinessLogic(AbstractWalletDAO* wDAO, AbstractMovementDAO* mDAO, AbstractOracleDAO* oDAO);
+    BusinessLogic(AbstractWalletDAO *wDAO, AbstractMovementDAO *mDAO, AbstractOracleDAO *oDAO);
 
     double calculateWalletBalance(int walletId);
     double calculateGainLoss(int walletId);
