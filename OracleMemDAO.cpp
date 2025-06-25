@@ -32,3 +32,14 @@ void OracleMemDAO::saveQuote(OracleDTO *quote)
         memoryDBConnection->getOracleMap()[dateStr] = quote;
     }
 }
+
+void OracleMemDAO::clearAll() 
+{
+    for (std::map<std::string, OracleDTO*>::iterator it = memoryDBConnection->getOracleMap().begin();
+        it != memoryDBConnection->getOracleMap().end();
+        ++it)
+    {
+        delete it->second;
+    }
+    memoryDBConnection->getOracleMap().clear(); 
+}   

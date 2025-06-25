@@ -36,6 +36,17 @@ public:
 	static void printMessage(string text);
 	static void printFramedMessage(string text, string symbol, int length);
 	static string replicate(string text, int times);
+	
+	static const int AUTO_GENERATED_ID = 0;
+	
+	static const int TABLE_WIDTH_NORMAL = 80;
+	static const int TABLE_WIDTH_WIDE = 100;
+	static const string DECORATOR_EQUALS;
+    static const string DECORATOR_DASH;
+
+	static const char* ANSI_RED;
+	static const char* ANSI_GREEN;
+	static const char* ANSI_RESET;
 };
 
 #endif /* UTILS_H_ */

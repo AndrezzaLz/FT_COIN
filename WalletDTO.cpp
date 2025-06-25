@@ -1,4 +1,5 @@
 #include "WalletDTO.hpp"
+#include "Utils.h"
 #include <stdexcept>
 
 WalletDTO::WalletDTO(int walletId, const string &holderName, const string &exchangeName) : walletId(walletId), holderName(holderName), exchangeName(exchangeName)
@@ -34,7 +35,7 @@ string WalletDTO::getExchangeName() const
 
 void WalletDTO::setWalletId(int walletId)
 {
-    if (this->walletId == 0)
+    if (this->walletId == Utils::AUTO_GENERATED_ID)
     {
         this->walletId = walletId;
     }
@@ -42,4 +43,14 @@ void WalletDTO::setWalletId(int walletId)
     {
         throw runtime_error("Operacao invalida: Alteracao do valor de IdCarteira que nao e nulo.");
     }
+}
+
+void WalletDTO::setHolderName(const string& holderName) 
+{
+    this->holderName = holderName;
+}
+
+void WalletDTO::setExchangeName(const string& exchangeName)
+{
+    this->exchangeName = exchangeName;
 }

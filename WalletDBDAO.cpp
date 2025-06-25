@@ -103,13 +103,44 @@ void WalletDBDAO::deleteWallet(int walletId)
 {
     try
     {
-        unique_ptr<sql::PreparedStatement> stmnt(serverDBConnection->getConnection()->prepareStatement(SQL_deleteWallet));
-        stmnt->setInt(1, walletId);
-        stmnt->executeQuery();
+        serverDBConnection->getConnection()->setAutoCommit(false);
+
+        // Exclusão das movimentações associadas a Carteira devido à relação de Chave Estragengeira de Moviventação
+        unique_ptr<sql::PreparedStatement> stmntDeleteMovement(serverDBConnection->getConnection()->prepareStatement("delete from MOVIMENTACAO where IdCarteira = ?"));
+        stmntDeleteMovement->setInt(1, walletId);
+        stmntDeleteMovement->executeQuery();
+
+        unique_ptr<sql::PreparedStatement> stmntDeleteWallet(serverDBConnection->getConnection()->prepareStatement(SQL_deleteWallet));
+        stmntDeleteWallet->setInt(1, walletId);
+        stmntDeleteWallet->executeQuery();
+
+        serverDBConnection->getConnection()->commit();
+        serverDBConnection->getConnection()->setAutoCommit(true);
     }
     catch (sql::SQLException &e)
     {
-        cerr << "Erro ao deletar Carteira: " << e.what() << endl;
+        try
+        {
+            serverDBConnection->getConnection()->rollback();
+            serverDBConnection->getConnection()->setAutoCommit(true);
+        }
+        catch(const std::exception& rb_e)
+        {
+            cerr << "Erro no rollback: " << rb_e.what() << endl;
+        }
+        cerr << "Erro ao deletar Carteira e/ou suas Movimentacoes: " << e.what() << endl;
+    }
+}
+
+void WalletDBDAO::clearAll() {
+    try 
+    {
+        unique_ptr<sql::Statement> stmnt(serverDBConnection->getConnection()->createStatement());
+        stmnt->executeQuery("delete from CARTEIRA");
+    } 
+    catch(sql::SQLException &e) 
+    {
+        cerr << "Erro ao limpar tabela CARTEIRA: " << e.what() << endl;
     }
 }
 

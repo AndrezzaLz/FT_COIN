@@ -1,5 +1,6 @@
 #include <vector>
 #include "WalletMemDAO.hpp"
+#include "Utils.h"
 
 int WalletMemDAO::lastWalletId = 1;
 
@@ -44,8 +45,25 @@ void WalletMemDAO::addWallet(WalletDTO *wallet)
 
 void WalletMemDAO::updateWallet(WalletDTO *wallet)
 {
-    deleteWallet(wallet->getWalletId());
-    addWallet(wallet);
+    vector<WalletDTO*> &wallets = memoryDBConnection->getWalletList();
+    bool found = false;
+    
+    for (WalletDTO* existingWalletPtr : wallets) 
+    {
+        if (existingWalletPtr->getWalletId() == wallet->getWalletId()) 
+        {
+            existingWalletPtr->setHolderName(wallet->getHolderName());
+            existingWalletPtr->setExchangeName(wallet->getExchangeName());
+            found = true;
+            delete wallet;
+            break; 
+        }
+    }
+    if (!found) 
+    {
+        Utils::printMessage("Aviso: Carteira nao encontrada para atualizacao em memoria.");
+        delete wallet; 
+    }
 }
 
 void WalletMemDAO::deleteWallet(int walletId)
@@ -64,4 +82,14 @@ void WalletMemDAO::deleteWallet(int walletId)
         }
         walletsIterator++;
     }
+}
+
+void WalletMemDAO::clearAll() 
+{
+    for (WalletDTO* buffer : memoryDBConnection->getWalletList()) 
+    {
+        delete buffer;
+    }
+    memoryDBConnection->getWalletList().clear();
+    lastWalletId = 0;
 }
