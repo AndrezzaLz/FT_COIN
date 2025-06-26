@@ -15,14 +15,6 @@ double BusinessLogic::calculateWalletBalance(int walletId)
     {
         OracleDTO *quote = oracleDAO->getQuoteByDate(mov->getDate());
 
-        if (quote == nullptr)
-        {
-            std::cerr << "AVISO: Cotacao nao encontrada para a data " << mov->getDate()
-                      << " (ID da Movimentacao: " << mov->getMovementId() << ") na carteira " << walletId
-                      << ". Movimentacao ignorada no balanco." << std::endl;
-            continue;
-        }
-
         double value = mov->getQuantity() * quote->getQuote();
 
         if (mov->getOperationType() == OperationType::BUY)

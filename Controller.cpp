@@ -149,7 +149,7 @@ void Controller::actionReports()
         &Controller::showWalletBalance,
         &Controller::showMovementHistory,
         &Controller::showGainsLosses,
-        &Controller::exportHistoryToCSV // <-- PONTEIRO PARA A NOVA FUNÇÃO
+        &Controller::exportHistoryToCSV 
     };
     launchActions("Relatorios", menuItens, functions);
 }
@@ -425,6 +425,7 @@ void Controller::registerPurchase()
         Utils::printMessage("Carteira com ID " + to_string(walletId) + " nao encontrada. Operacao cancelada.");
         return;
     }
+    delete targetWallet; // Liberar memória, pois só precisamos do ID por enquanto
 
     Date opDate;
     cout << "Data da Operacao (DD.MM.YYYY): ";
@@ -435,6 +436,14 @@ void Controller::registerPurchase()
         cout << "Data invalida. Digite no formato DD.MM.YYYY: ";
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    OracleDTO *quote = oracleDAO->getQuoteByDate(opDate);
+    if (quote == nullptr)
+    {
+        Utils::printMessage(string(Utils::ANSI_RED) + "ERRO: Nao existe cotacao para a data " + opDate.getIsoFormat() + ". Operacao cancelada." + Utils::ANSI_RESET);
+        return;
+    }
+    delete quote;
 
     double quantity;
     cout << "Quantidade Comprada: ";
@@ -481,6 +490,7 @@ void Controller::registerSale()
         Utils::printMessage("Carteira com ID " + to_string(walletId) + " nao encontrada. Operacao cancelada.");
         return;
     }
+    delete targetWallet; // Liberar memória
 
     Date opDate;
     cout << "Data da Operacao (DD.MM.YYYY): ";
@@ -491,6 +501,14 @@ void Controller::registerSale()
         cout << "Data invalida. Digite no formato DD.MM.YYYY: ";
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    OracleDTO *quote = oracleDAO->getQuoteByDate(opDate);
+    if (quote == nullptr)
+    {
+        Utils::printMessage(string(Utils::ANSI_RED) + "ERRO: Nao existe cotacao para a data " + opDate.getIsoFormat() + ". Operacao cancelada." + Utils::ANSI_RESET);
+        return; // Interrompe a função aqui se a cotação não for encontrada
+    }
+    delete quote;
 
     double quantity;
     cout << "Quantidade Vendida: ";

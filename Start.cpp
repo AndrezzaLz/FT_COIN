@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
     int choice = -1;
 
     std::cout << "Selecione o modo de persistencia:" << std::endl;
-    std::cout << "1. Banco de Dados em Memoria (rapido, dados perdidos ao sair)" << std::endl;
-    std::cout << "2. Banco de Dados MariaDB (requer servidor, dados permanentes)" << std::endl;
+    std::cout << "1. Banco de Dados em Memoria" << std::endl;
+    std::cout << "2. Banco de Dados MariaDB (requer servidor)" << std::endl;
 
     while (true)
     {
