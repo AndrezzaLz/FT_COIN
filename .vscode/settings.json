@@ -101,5 +101,6 @@
     "streambuf": "cpp",
     "typeinfo": "cpp",
     "numbers": "cpp"
-  }
+  },
+  "makefile.configureOnOpen": true
 }
