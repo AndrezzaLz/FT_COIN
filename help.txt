@@ -43,6 +43,6 @@ Usando Makefile para compilar o projeto FT COIN:
 - Para limpar o diretório e compilar novamente:
   make clean && make
 
-Em caso de dúvidas ou problemas, consulte a tela de Créditos para informações do desenvolvedor.
+Em caso de dúvidas ou problemas, consulte a tela de Créditos para informações dos desenvolvedores.
 
 Aproveite o FT_Coin para ter mais controle sobre suas finanças de criptomoedas!
